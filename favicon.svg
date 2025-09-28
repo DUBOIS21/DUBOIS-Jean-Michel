@@ -1,0 +1,42 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Logo for IA Images, an AI image generation and editing tool.">
+  <defs>
+    <linearGradient id="grad-left" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#A8E063;" />
+      <stop offset="100%" style="stop-color:#56A3D1;" />
+    </linearGradient>
+    <linearGradient id="grad-right" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#C3AED6;" />
+      <stop offset="100%" style="stop-color:#8A6EAF;" />
+    </linearGradient>
+     <linearGradient id="grad-mountains" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#98FB98;" />
+      <stop offset="100%" style="stop-color:#3CB371;" />
+    </linearGradient>
+  </defs>
+
+  <!-- Right side shape -->
+  <path d="M 50 10 L 88 35 V 65 L 50 90 Z" fill="url(#grad-right)"/>
+  <!-- Mountain Icon on Right -->
+  <path d="M 67 43 L 72 34 L 77 43 L 81 39 L 85 43 L 85 48 L 67 48 Z" fill="url(#grad-mountains)" />
+  <circle cx="82" cy="32" r="4" fill="white" fill-opacity="0.8"/>
+  <path d="M 64 52 H 85 M 64 57 H 85" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-opacity="0.7"/>
+  <!-- Connecting lines on Right -->
+   <path d="M 50 50 L 62 50 L 62 68 M 50 68 L 62 68" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Left side shape -->
+  <path d="M 50 10 C 20 20, 12 80, 50 90 V 10 Z" fill="url(#grad-left)"/>
+  <!-- Connecting lines on Left -->
+  <path d="M 50 50 L 38 50 L 38 32 M 50 32 L 38 32" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Pixels dissolving from left side -->
+  <g>
+    <rect x="25" y="25" width="4" height="4" fill="#A1DA71" />
+    <rect x="22" y="32" width="3" height="3" fill="#9AD67C" />
+    <rect x="26" y="38" width="3.5" height="3.5" fill="#93D287" />
+    <rect x="20" y="45" width="4" height="4" fill="#8BCE93" />
+    <rect x="23" y="52" width="3" height="3" fill="#80C8A2" />
+    <rect x="18" y="59" width="3.5" height="3.5" fill="#76C2B1" />
+    <rect x="22" y="66" width="3" height="3" fill="#6BBDC0" />
+    <rect x="17" y="73" width="2.5" height="2.5" fill="#61B7CE" />
+  </g>
+</svg>

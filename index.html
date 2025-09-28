@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+  <head>
+    <meta charset="UTF-ag" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Studio Créatif IA (Offert par : www.dubois21.com)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'bunker': {
+                '50': '#f4f5f6',
+                '100': '#e8eaed',
+                '200': '#d2d6db',
+                '300': '#b1b8c1',
+                '400': '#8d96a4',
+                '500': '#707a8a',
+                '600': '#5b6473',
+                '700': '#4b5260',
+                '800': '#404652',
+                '900': '#383d46',
+                '950': '#0e1015',
+              },
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-bunker-50 dark:bg-bunker-950 text-bunker-900 dark:text-bunker-100">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
