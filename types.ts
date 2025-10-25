@@ -1,6 +1,10 @@
 export enum Tab {
   GENERATOR = 'generator',
   EDITOR = 'editor',
+  PROMPT_BUILDER = 'prompt-builder',
+  V_TEXTE = 'v-texte',
+  V_IMAGE = 'v-image',
+  VIDEO = 'video',
 }
 
 export type AspectRatio = "1:1" | "3:4" | "4:3" | "9:16" | "16:9";
@@ -10,8 +14,9 @@ export interface GenerationSettings {
   negativePrompt: string;
   aspectRatio: AspectRatio;
   modelStyle?: string;
-  inputImageUrl?: string;
+  inputImageUrls?: string[];
   numberOfImages: number;
+  seed?: number;
 }
 
 export interface HistoryEntry extends GenerationSettings {

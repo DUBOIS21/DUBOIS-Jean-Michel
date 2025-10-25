@@ -4,55 +4,8 @@ import { editImage, generateImage } from '../services/geminiService';
 import MaskableImage from './MaskableImage';
 import ImageComparisonSlider from './ImageComparisonSlider';
 import { AspectRatio } from '../types';
-
-const ArrowUturnLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-    </svg>
-);
-
-const PencilIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-    </svg>
-);
-
-const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-    </svg>
-);
-
-const MagnifyingGlassIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-);
-
-const XCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-    </svg>
-);
-
-const DiceIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-      <circle cx="8.5" cy="8.5" r=".5" fill="currentColor" />
-      <circle cx="15.5" cy="8.5" r=".5" fill="currentColor" />
-      <circle cx="15.5" cy="15.5" r=".5" fill="currentColor" />
-      <circle cx="8.5" cy="15.5" r=".5" fill="currentColor" />
-      <circle cx="12" cy="12" r=".5" fill="currentColor" />
-    </svg>
-);
-
-const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-    </svg>
-);
-
+import { ArrowUturnLeftIcon, PencilIcon, DownloadIcon, MagnifyingGlassIcon, XCircleIcon, DiceIcon, SparklesIcon, XMarkIcon } from './Icons';
+import HelpTooltip from './HelpTooltip';
 
 const predefinedEdits = [
     {
@@ -151,121 +104,6 @@ const predefinedEdits = [
     },
 ];
 
-const useCases = {
-    category: "🖼️ Cas d'utilisation",
-    options: [
-      { label: "Cas 1: Illustration à la figure", prompt: "Illustration à la figure" },
-      { label: "Cas 2: Générer une vue au sol à partir d'une flèche de carte", prompt: "Générer une vue au sol à partir d'une flèche de carte" },
-      { label: "Cas 3: Informations de réalité augmentée", prompt: "Informations de réalité augmentée" },
-      { label: "Cas 4: Extraire des bâtiments 3D/Créer des modèles isométriques", prompt: "Extraire des bâtiments 3D/Créer des modèles isométriques" },
-      { label: "Cas 5: Photos de vous à différentes époques", prompt: "Photos de vous à différentes époques" },
-      { label: "Cas 6: Génération d'images multi références", prompt: "Génération d'images multi références" },
-      { label: "Cas 7: Retouche photo automatique", prompt: "Retouche photo automatique" },
-      { label: "Cas 8: Le dessin à la main contrôle les poses multi-personnages", prompt: "Le dessin à la main contrôle les poses multi-personnages" },
-      { label: "Cas 9: Génération d'images à vue croisée", prompt: "Génération d'images à vue croisée" },
-      { label: "Cas 10: Autocollants de personnages personnalisés", prompt: "Autocollants de personnages personnalisés" },
-      { label: "Cas 11: Anime à Real Coser", prompt: "Anime à Real Coser" },
-      { label: "Cas 12: Générer la conception du personnage", prompt: "Générer la conception du personnage" },
-      { label: "Cas 13: Dessin au trait avec palette de couleurs", prompt: "Dessin au trait avec palette de couleurs" },
-      { label: "Cas 14: Infographie de l'article", prompt: "Infographie de l'article" },
-      { label: "Cas 15: Changer plusieurs coiffures", prompt: "Changer plusieurs coiffures" },
-      { label: "Cas 16: Diagramme explicatif des annotations du modèle", prompt: "Diagramme explicatif des annotations du modèle" },
-      { label: "Cas 17: Sculpture en marbre personnalisée", prompt: "Sculpture en marbre personnalisée" },
-      { label: "Cas 18: Cuisiner à partir d'ingrédients", prompt: "Cuisiner à partir d'ingrédients" },
-      { label: "Cas 19: Raisonnement sur des problèmes mathématiques", prompt: "Raisonnement sur des problèmes mathématiques" },
-      { label: "Cas 20: Colorisation d'une ancienne photo", prompt: "Colorisation d'une ancienne photo" },
-      { label: "Cas 21: Tenue OOTD", prompt: "Tenue OOTD" },
-      { label: "Cas 22: Changement de vêtements de personnage", prompt: "Changement de vêtements de personnage" },
-      { label: "Cas 23: Génération de résultats multi-vues", prompt: "Génération de résultats multi-vues" },
-      { label: "Cas 24: Storyboard de film", prompt: "Storyboard de film" },
-      { label: "Cas 25: Modification de la pose du personnage", prompt: "Modification de la pose du personnage" },
-      { label: "Cas 26: Générer une image à partir d'un dessin au trait", prompt: "Générer une image à partir d'un dessin au trait" },
-      { label: "Cas 27: Ajouter un filigrane à l'image", prompt: "Ajouter un filigrane à l'image" },
-      { label: "Cas 28: Génération d'images par raisonnement intellectuel", prompt: "Génération d'images par raisonnement intellectuel" },
-      { label: "Cas 29: Annotations au stylo rouge", prompt: "Annotations au stylo rouge" },
-      { label: "Cas 30: Nourriture explosive", prompt: "Nourriture explosive" },
-      { label: "Cas 31: Créer une bande dessinée", prompt: "Créer une bande dessinée" },
-      { label: "Cas 32: Figurine d'action", prompt: "Figurine d'action" },
-      { label: "Cas 33: Carte des bâtiments isométriques", prompt: "Carte des bâtiments isométriques" },
-      { label: "Cas 34: L'image de référence contrôle l'expression de caractère", prompt: "L'image de référence contrôle l'expression de caractère" },
-      { label: "Cas 35: Processus de dessin d'illustration en quatre panneaux", prompt: "Processus de dessin d'illustration en quatre panneaux" },
-      { label: "Cas 36: Essai de maquillage virtuel", prompt: "Essai de maquillage virtuel" },
-      { label: "Cas 37: Analyse du maquillage", prompt: "Analyse du maquillage" },
-      { label: "Cas 38: Vue Google Maps de la Terre du Milieu", prompt: "Vue Google Maps de la Terre du Milieu" },
-      { label: "Cas 39: Génération d'illustrations typographiques", prompt: "Génération d'illustrations typographiques" },
-      { label: "Cas 40: Génération de poses de personnages multiples", prompt: "Génération de poses de personnages multiples" },
-      { label: "Cas 41: Génération d'emballages de produits", prompt: "Génération d'emballages de produits" },
-      { label: "Cas 42: Filtre/matériau de superposition", prompt: "Filtre/matériau de superposition" },
-      { label: "Cas 43: Contrôler la forme du visage du personnage", prompt: "Contrôler la forme du visage du personnage" },
-      { label: "Cas 44: Contrôle de l'éclairage", prompt: "Contrôle de l'éclairage" },
-      { label: "Cas 45: Figurine LEGO", prompt: "Figurine LEGO" },
-      { label: "Cas 46: Figurine modèle Gundam", prompt: "Figurine modèle Gundam" },
-      { label: "Cas 47: Vue éclatée du matériel", prompt: "Vue éclatée du matériel" },
-      { label: "Cas 48: Annotation des calories alimentaires", prompt: "Annotation des calories alimentaires" },
-      { label: "Cas 49: Extraire le sujet et le placer sur un calque transparent", prompt: "Extraire le sujet et le placer sur un calque transparent" },
-      { label: "Cas 50: Réparation de l'image décolorée", prompt: "Réparation de l'image décolorée" },
-      { label: "Cas 51: Carte ancienne → Photo de scène historique", prompt: "Carte ancienne → Photo de scène historique" },
-      { label: "Cas 52: Collage de Moodboard de mode", prompt: "Collage de Moodboard de mode" },
-      { label: "Cas 53: Photo de produit délicate et mignonne", prompt: "Photo de produit délicate et mignonne" },
-      { label: "Cas 54: Placer une statue d'anime dans la vie réelle", prompt: "Placer une statue d'anime dans la vie réelle" },
-      { label: "Cas 55: Créer une voiture Itasha", prompt: "Créer une voiture Itasha" },
-      { label: "Cas 56: Composition de manga", prompt: "Composition de manga" },
-      { label: "Cas 57: Conversion de style manga", prompt: "Conversion de style manga" },
-      { label: "Cas 58: Wireframe holographique isométrique", prompt: "Wireframe holographique isométrique" },
-      { label: "Cas 59: Génération de scènes de style Minecraft", prompt: "Génération de scènes de style Minecraft" },
-      { label: "Cas 60: Appliquer Material Sphere au logo", prompt: "Appliquer Material Sphere au logo" },
-      { label: "Cas 61: Plan d'étage", prompt: "Plan d'étage" },
-      { label: "Cas 62: Réinitialiser les paramètres de l'appareil photo", prompt: "Réinitialiser les paramètres de l'appareil photo" },
-      { label: "Cas 63: Créer une photo d'identité", prompt: "Créer une photo d'identité" },
-      { label: "Cas 64: Carte pliante Scène A6", prompt: "Carte pliante Scène A6" },
-      { label: "Cas 65: Concevoir un jeu d'échecs", prompt: "Concevoir un jeu d'échecs" },
-      { label: "Cas 66: Photo de style contraste fractionné", prompt: "Photo de style contraste fractionné" },
-      { label: "Cas 67: Conception d'une collection de bijoux", prompt: "Conception d'une collection de bijoux" },
-      { label: "Cas 68: Conception de produits dérivés", prompt: "Conception de produits dérivés" },
-      { label: "Cas 69: Projection holographique du modèle", prompt: "Projection holographique du modèle" },
-      { label: "Cas 70: Échafaudage à figures géantes", prompt: "Échafaudage à figures géantes" },
-      { label: "Cas 71: Extraction d'un bâtiment à partir d'une image de télédétection", prompt: "Extraction d'un bâtiment à partir d'une image de télédétection" },
-      { label: "Cas 72: Extraction de composants", prompt: "Extraction de composants" },
-      { label: "Cas 73: Supprimer les ingrédients du burger", prompt: "Supprimer les ingrédients du burger" },
-      { label: "Cas 74: Restauration d'image haute résolution", prompt: "Restauration d'image haute résolution" },
-      { label: "Cas 75: Générer une scène miniature à partir d'une image", prompt: "Générer une scène miniature à partir d'une image" },
-      { label: "Cas 76: Bande dessinée éducative", prompt: "Bande dessinée éducative" },
-      { label: "Cas 77: Génération d'un pack d'émojis de personnages personnalisés", prompt: "Génération d'un pack d'émojis de personnages personnalisés" },
-      { label: "Cas 78: Restaurer un aliment partiellement consommé", prompt: "Restaurer un aliment partiellement consommé" },
-      { label: "Cas 79: Création d'interface de jeu de combat", prompt: "Création d'interface de jeu de combat" },
-      { label: "Cas 80: Coupe transversale du modèle", prompt: "Coupe transversale du modèle" },
-      { label: "Cas 81: Avis de recherche de pirate", prompt: "Avis de recherche de pirate" },
-      { label: "Cas 82: Présentoir de marchandises", prompt: "Présentoir de marchandises" },
-      { label: "Cas 83: Stand de convention de bandes dessinées", prompt: "Stand de convention de bandes dessinées" },
-      { label: "Cas 84: Dessin au trait en dessin griffonné", prompt: "Dessin au trait en dessin griffonné" },
-      { label: "Cas 85: Espace d'exposition d'art contemporain", prompt: "Espace d'exposition d'art contemporain" },
-      { label: "Cas 86: Carte de tarot gothique sombre", prompt: "Carte de tarot gothique sombre" },
-      { label: "Cas 87: Graphique d'évolution en noir et blanc", prompt: "Graphique d'évolution en noir et blanc" },
-      { label: "Cas 88: Souvenir en bouteille de verre", prompt: "Souvenir en bouteille de verre" },
-      { label: "Cas 89: Magasin miniature", prompt: "Magasin miniature" },
-      { label: "Cas 90: Devenir un Vtuber", prompt: "Devenir un Vtuber" },
-      { label: "Cas 91: Affiche du film « Train Station »", prompt: "Affiche du film « Train Station »" },
-      { label: "Cas 92: Movie Lounge", prompt: "Movie Lounge" },
-      { label: "Cas 93: Trancher un objet avec un effet d'explosion de dessin animé", prompt: "Trancher un objet avec un effet d'explosion de dessin animé" },
-      { label: "Cas 94: Train à thème de personnages", prompt: "Train à thème de personnages" },
-      { label: "Cas 95: Parc à thème personnalisé", prompt: "Parc à thème personnalisé" },
-      { label: "Cas 96: Créer une image de constellation", prompt: "Créer une image de constellation" },
-      { label: "Cas 97: Transformer une image en fond d'écran", prompt: "Transformer une image en fond d'écran" },
-      { label: "Cas 98: Créer une affiche de film", prompt: "Créer une affiche de film" },
-      { label: "Cas 99: Transformer un compte X en disquette", prompt: "Transformer un compte X en disquette" },
-      { label: "Cas 100: Rendre l'objet image de référence transparent", prompt: "Rendre l'objet image de référence transparent" },
-      { label: "Cas 101: Illustration d'un judas fisheye", prompt: "Illustration d'un judas fisheye" },
-      { label: "Cas 102: Design d'intérieur de super-héros", prompt: "Design d'intérieur de super-héros" },
-      { label: "Cas 103: Machine à griffes personnalisée", prompt: "Machine à griffes personnalisée" },
-      { label: "Cas 104: Conception de logo typographique", prompt: "Conception de logo typographique" },
-      { label: "Cas 105: Interface utilisateur de statut de personnage RPG", prompt: "Interface utilisateur de statut de personnage RPG" },
-      { label: "Cas 106: Convertir un diagramme de texte en pictogrammes", prompt: "Convertir un diagramme de texte en pictogrammes" },
-      { label: "Cas 107: Dessiner sur un écran à stylet", prompt: "Dessiner sur un écran à stylet" },
-      { label: "Cas 108: Créer une image de tampon LINE", prompt: "Créer une image de tampon LINE" },
-      { label: "Cas 109: Thérapie pour le soi enfantin", prompt: "Thérapie pour le soi enfantin" },
-      { label: "Cas 110: Portrait de style Pixar", prompt: "Portrait de style Pixar" },
-    ]
-};
 
 const preFilledPromptsForGeneration = {
     "Paysages fantastiques": "Un paysage de montagne à couper le souffle avec des cascades flottantes et des cristaux lumineux, style art numérique, très détaillé, concept art.",
@@ -319,7 +157,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
     const [editedImageUrl, setEditedImageUrl] = useState<string | null>(null);
     const [prompt, setPrompt] = useState<string>('');
     const [selectedAction, setSelectedAction] = useState<string>('');
-    const [selectedUseCase, setSelectedUseCase] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -379,10 +216,9 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            handleReset();
             setOriginalImage(file);
             setOriginalImageUrl(URL.createObjectURL(file));
-            setEditedImageUrl(null);
-            setError(null);
         }
     };
 
@@ -392,7 +228,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
         setEditedImageUrl(null);
         setPrompt('');
         setSelectedAction('');
-        setSelectedUseCase('');
         setError(null);
         setIsLoading(false);
         setIsGenerating(false);
@@ -407,7 +242,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
         const randomPrompt = allEditPrompts[randomIndex];
         setPrompt(randomPrompt);
         setSelectedAction(randomPrompt);
-        setSelectedUseCase('');
     };
 
     const handleGenerateRandomImage = async () => {
@@ -470,7 +304,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
             setError(null);
             setPrompt('');
             setSelectedAction('');
-            setSelectedUseCase('');
 
         } catch (e) {
             setError("Impossible de continuer la modification.");
@@ -487,14 +320,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
         const selectedPrompt = e.target.value;
         setSelectedAction(selectedPrompt);
         setPrompt(selectedPrompt);
-        setSelectedUseCase('');
-    };
-
-    const handleUseCaseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedPrompt = e.target.value;
-        setSelectedUseCase(selectedPrompt);
-        setPrompt(selectedPrompt);
-        setSelectedAction('');
     };
 
     return (
@@ -502,7 +327,17 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
             <div className="bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg">
                 <div className="flex flex-col gap-6">
                     <div>
-                        <label className="font-semibold block mb-2 text-lg">1. Préparez votre image</label>
+                        <div className="flex items-center gap-2 mb-2">
+                           <label className="font-semibold block text-lg">1. Préparez votre image</label>
+                            <HelpTooltip title="Comment utiliser l'Éditeur ?">
+                                <ol>
+                                    <li><strong>Préparez votre image :</strong> Importez une image de votre appareil ou générez-en une aléatoirement. Vous pouvez aussi envoyer une image depuis l'onglet "Générateur".</li>
+                                    <li><strong>Décrivez la modification :</strong> Expliquez ce que vous voulez changer. Utilisez les actions rapides pour des idées ou écrivez votre propre instruction (ex: <code>ajoute un chapeau de pirate</code>).</li>
+                                    <li><strong>Peignez la zone :</strong> Utilisez votre souris pour colorier en rose la partie de l'image que vous souhaitez modifier. Ajustez la taille du pinceau si besoin.</li>
+                                    <li><strong>Modifier :</strong> Cliquez pour appliquer vos changements. Une comparaison "Avant/Après" apparaîtra. Vous pourrez alors télécharger le résultat ou continuer les modifications.</li>
+                                </ol>
+                            </HelpTooltip>
+                        </div>
                         <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-bunker-50 dark:bg-bunker-950 rounded-lg border border-bunker-200 dark:border-bunker-800">
                             <div className="flex-1 w-full">
                                 <p className="text-sm font-medium mb-2 text-bunker-700 dark:text-bunker-300">Choisissez une image locale</p>
@@ -539,7 +374,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                                     value={selectedAction}
                                     onChange={handlePredefinedEditChange}
                                     disabled={!originalImage || isLoading || isGenerating}
-                                    className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                                    className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
                                 >
                                     <option value="">Choisissez une action rapide...</option>
                                     {predefinedEdits.map(group => (
@@ -548,18 +383,6 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                                                 <option key={option.label} value={option.prompt}>{option.label}</option>
                                             ))}
                                         </optgroup>
-                                    ))}
-                                </select>
-                                <select
-                                    id="use-cases"
-                                    value={selectedUseCase}
-                                    onChange={handleUseCaseChange}
-                                    disabled={!originalImage || isLoading || isGenerating}
-                                    className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
-                                >
-                                    <option value="">{useCases.category}...</option>
-                                    {useCases.options.map(option => (
-                                        <option key={option.label} value={option.prompt}>{option.label}</option>
                                     ))}
                                 </select>
                            </div>
@@ -571,7 +394,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                                         value={prompt}
                                         onChange={(e) => setPrompt(e.target.value)}
                                         placeholder="... ou écrivez une instruction personnalisée ici"
-                                        className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                                        className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
                                         disabled={!originalImage || isLoading || isGenerating}
                                     />
                                     <div className="flex justify-end mt-2">
@@ -586,7 +409,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                                         </button>
                                     </div>
                                 </div>
-                                <button onClick={handleEdit} disabled={isLoading || !prompt || !originalImage || isGenerating} className="py-3 px-6 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 dark:disabled:bg-bunker-600 disabled:cursor-not-allowed transition-transform duration-200 transform hover:scale-105 shadow-lg">
+                                <button onClick={handleEdit} disabled={isLoading || !prompt || !originalImage || isGenerating} className="py-3 px-6 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 dark:disabled:bg-bunker-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg">
                                     {isLoading ? (
                                         <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
                                     ) : (
@@ -617,7 +440,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                             max="100"
                             value={brushSize}
                             onChange={(e) => setBrushSize(Number(e.target.value))}
-                            className="w-48"
+                            className="w-48 h-2 bg-bunker-200 dark:bg-bunker-700 rounded-lg appearance-none cursor-pointer accent-sky-600"
                         />
                         <span className="text-sm">{brushSize}px</span>
                     </div>
@@ -640,13 +463,13 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
                         }
                         if (originalImageUrl && editedImageUrl) {
                             return (
-                                <div className="relative group">
+                                <div>
                                     <h3 className="text-xl font-bold mb-4">Comparez Avant / Après</h3>
                                     <ImageComparisonSlider beforeSrc={originalImageUrl} afterSrc={editedImageUrl} />
-                                    <div className="absolute bottom-4 right-4 z-10 flex gap-2">
-                                        <button onClick={handleDiscardEdit} className="bg-red-600 text-white p-3 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-red-700" title="Annuler et revenir à l'édition"><XCircleIcon className="w-5 h-5" /></button>
-                                        <button onClick={handleContinueEditing} className="bg-bunker-100 dark:bg-bunker-800 text-bunker-900 dark:text-bunker-100 p-3 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-bunker-200 dark:hover:bg-bunker-700" title="Continuer les modifications"><PencilIcon className="w-5 h-5" /></button>
-                                        <button onClick={() => setIsPopupOpen(true)} className="bg-bunker-100 dark:bg-bunker-800 text-bunker-900 dark:text-bunker-100 p-3 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-bunker-200 dark:hover:bg-bunker-700" title="Voir en taille réelle"><MagnifyingGlassIcon className="w-5 h-5" /></button>
+                                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                                        <button onClick={handleDiscardEdit} className="bg-red-600 text-white py-2 px-4 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-red-700" title="Annuler et revenir à l'édition"><XCircleIcon className="w-5 h-5" /><span>Annuler</span></button>
+                                        <button onClick={handleContinueEditing} className="bg-bunker-100 dark:bg-bunker-800 text-bunker-900 dark:text-bunker-100 py-2 px-4 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-bunker-200 dark:hover:bg-bunker-700" title="Continuer les modifications"><PencilIcon className="w-5 h-5" /><span>Continuer</span></button>
+                                        <button onClick={() => setIsPopupOpen(true)} className="bg-bunker-100 dark:bg-bunker-800 text-bunker-900 dark:text-bunker-100 py-2 px-4 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-bunker-200 dark:hover:bg-bunker-700" title="Voir en taille réelle"><MagnifyingGlassIcon className="w-5 h-5" /><span>Agrandir</span></button>
                                         <a href={editedImageUrl} download="modification-ia.png" className="bg-sky-600 text-white py-2 px-4 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:bg-sky-700">
                                             <DownloadIcon className="w-5 h-5" />
                                             <span>Télécharger</span>
@@ -673,7 +496,7 @@ const ImageEditor: React.FC<ImageEditorProps> = ({ initialImage, onImageProcesse
             {isPopupOpen && editedImageUrl && (
                 <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setIsPopupOpen(false)}>
                     <button className="absolute top-4 right-4 text-white bg-black/50 p-2 rounded-full hover:bg-black/80 transition-colors z-50" onClick={() => setIsPopupOpen(false)} aria-label="Fermer">
-                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                         <XMarkIcon className="w-6 h-6" />
                     </button>
                     <div className="relative w-full h-full overflow-auto" onClick={(e) => e.stopPropagation()}>
                         <img src={editedImageUrl} alt="Image modifiée en taille réelle" className="max-w-none max-h-none mx-auto my-auto block"/>

@@ -1,167 +1,12 @@
 
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { generateImage } from '../services/geminiService';
 import { AspectRatio, HistoryEntry } from '../types';
+import { SparklesIcon, TrashIcon, DiceIcon, ArrowRightIcon, DownloadIcon, ArrowUpOnSquareIcon, ArrowDownOnSquareIcon, MagnifyingGlassIcon, XMarkIcon, ChevronDownIcon, PhotoIcon } from './Icons';
+import HelpTooltip from './HelpTooltip';
+import ImagePreviewModal from './ImagePreviewModal';
 
-const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-    </svg>
-);
-
-const TrashIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-    </svg>
-);
-
-const DiceIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <rect x="4" y="4" width="16" height="16" rx="2" />
-      <circle cx="8.5" cy="8.5" r=".5" fill="currentColor" />
-      <circle cx="15.5" cy="8.5" r=".5" fill="currentColor" />
-      <circle cx="15.5" cy="15.5" r=".5" fill="currentColor" />
-      <circle cx="8.5" cy="15.5" r=".5" fill="currentColor" />
-      <circle cx="12" cy="12" r=".5" fill="currentColor" />
-    </svg>
-);
-
-const ArrowRightIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-    </svg>
-);
-
-const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-);
-
-const ArrowUpOnSquareIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
-);
-
-const ArrowDownOnSquareIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-);
-
-const MagnifyingGlassIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-);
-
-const XMarkIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-    </svg>
-);
-
-const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-    </svg>
-);
-
-const PhotoIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-    </svg>
-);
-
-
-// MODAL COMPONENT
-interface ImagePreviewModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    imageUrl: string | null;
-    onSendToEditor: (imageUrl: string) => void;
-}
-
-const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ isOpen, onClose, imageUrl, onSendToEditor }) => {
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
-        }
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = '';
-        };
-    }, [isOpen, onClose]);
-
-    if (!isOpen || !imageUrl) {
-        return null;
-    }
-
-    const handleSendToEditorClick = () => {
-        onSendToEditor(imageUrl);
-        onClose();
-    };
-
-    return (
-        <div
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-            style={{ animation: 'fadeIn 0.2s ease-out' }}
-            onClick={onClose}
-            aria-modal="true"
-            role="dialog"
-        >
-            <div
-                className="relative w-full h-full max-w-4xl max-h-[90vh] flex flex-col gap-4"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <button
-                    className="absolute -top-2 -right-2 text-white bg-bunker-900/80 p-2 rounded-full hover:bg-bunker-900/100 transition-colors z-10"
-                    onClick={onClose}
-                    aria-label="Fermer"
-                >
-                    <XMarkIcon className="w-6 h-6" />
-                </button>
-                <div className="flex-grow flex items-center justify-center overflow-hidden">
-                    <img
-                        src={imageUrl}
-                        alt="Aperçu de l'image générée"
-                        className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
-                    />
-                </div>
-                <div className="flex-shrink-0 flex items-center justify-center gap-4">
-                     <button
-                        onClick={handleSendToEditorClick}
-                        className="bg-sky-600 text-white py-3 px-6 rounded-lg flex items-center gap-2 hover:bg-sky-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                        title="Envoyer vers l'éditeur"
-                    >
-                        <ArrowRightIcon className="w-5 h-5" />
-                        <span>Vers l'éditeur</span>
-                    </button>
-                    <a
-                        href={imageUrl}
-                        download="creation-ia.jpg"
-                        className="bg-bunker-100 dark:bg-bunker-800 text-bunker-900 dark:text-bunker-100 py-3 px-6 rounded-lg flex items-center gap-2 hover:bg-bunker-200 dark:hover:bg-bunker-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                    >
-                        <DownloadIcon className="w-5 h-5" />
-                        <span>Télécharger</span>
-                    </a>
-                </div>
-            </div>
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-            `}</style>
-        </div>
-    );
-};
 
 const DEFAULT_NEGATIVE_PROMPT = '';
 
@@ -261,26 +106,51 @@ const predefinedStyles = ['Rétro futuriste', 'Cyberpunk', 'Peinture à l\'huile
 
 interface ImageGeneratorProps {
     onSendToEditor: (imageUrl: string) => void;
+    dailyUsage: number;
+    limit: number;
+    onUsageUpdate: (count: number) => void;
 }
 
-const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
+const saveHistorySafely = (historyToSave: HistoryEntry[]): HistoryEntry[] | null => {
+    try {
+        localStorage.setItem('generationHistory', JSON.stringify(historyToSave));
+        return historyToSave;
+    } catch (e: any) {
+        if ((e.name === 'QuotaExceededError' || String(e).toLowerCase().includes('quota')) && historyToSave.length > 0) {
+            console.warn(`Le quota de stockage local est dépassé. L'historique sera automatiquement réduit pour libérer de l'espace. Taille actuelle: ${historyToSave.length - 1} éléments.`);
+            const pruned = historyToSave.slice(0, historyToSave.length - 1);
+            if (pruned.length === 0 && historyToSave.length > 0) {
+                 try { localStorage.removeItem('generationHistory'); } catch (removeError) {}
+                 return [];
+            }
+            return saveHistorySafely(pruned);
+        }
+        console.error("Impossible de sauvegarder l'historique:", e);
+        return null;
+    }
+};
+
+const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUsage, limit, onUsageUpdate }) => {
     const [prompt, setPrompt] = useState<string>('');
     const [negativePrompt, setNegativePrompt] = useState<string>(DEFAULT_NEGATIVE_PROMPT);
     const [aspectRatio, setAspectRatio] = useState<AspectRatio | null>('1:1');
     const [customWidth, setCustomWidth] = useState<string>('');
     const [customHeight, setCustomHeight] = useState<string>('');
     const [modelStyle, setModelStyle] = useState<string>('');
+    const [seed, setSeed] = useState<string>('');
     const [generatedImages, setGeneratedImages] = useState<string[] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [activeImageUrlForModal, setActiveImageUrlForModal] = useState<string | null>(null);
-    const [inputImage, setInputImage] = useState<File | null>(null);
-    const [inputImageUrl, setInputImageUrl] = useState<string | null>(null);
+    const [inputImages, setInputImages] = useState<File[]>([]);
+    const [inputImageUrls, setInputImageUrls] = useState<string[]>([]);
     const [numberOfImages, setNumberOfImages] = useState<number>(1);
     const importInputRef = useRef<HTMLInputElement>(null);
     const uploadInputRef = useRef<HTMLInputElement>(null);
+
+    const MAX_INSPIRATION_IMAGES = 3;
 
     useEffect(() => {
         try {
@@ -288,18 +158,23 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
             if (savedHistory) {
                 setHistory(JSON.parse(savedHistory));
             }
+            const savedSettings = localStorage.getItem('generationSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                if (settings.seed) setSeed(String(settings.seed));
+            }
         } catch (e) {
-            console.error("Impossible de charger l'historique:", e);
+            console.error("Impossible de charger l'historique ou les paramètres:", e);
         }
     }, []);
-
-    const updateLocalStorageHistory = (updatedHistory: HistoryEntry[]) => {
+    
+    useEffect(() => {
         try {
-            localStorage.setItem('generationHistory', JSON.stringify(updatedHistory));
+            localStorage.setItem('generationSettings', JSON.stringify({ seed }));
         } catch (e) {
-            console.error("Impossible de sauvegarder l'historique:", e);
+            console.error("Impossible de sauvegarder les paramètres de génération:", e);
         }
-    };
+    }, [seed]);
 
     const addToHistory = (entry: Omit<HistoryEntry, 'id' | 'timestamp'>, imageUrls: string[]) => {
         setHistory(prevHistory => {
@@ -309,22 +184,32 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                 timestamp: Date.now(),
                 imageUrls: imageUrls,
             };
-            const updatedHistory = [newEntry, ...prevHistory].slice(0, 20); // Limit history to 20 items
-            updateLocalStorageHistory(updatedHistory);
-            return updatedHistory;
+            const updatedHistory = [newEntry, ...prevHistory].slice(0, 20);
+            
+            const finalHistory = saveHistorySafely(updatedHistory);
+            
+            if (finalHistory !== null) {
+                return finalHistory;
+            }
+            setError("Impossible de sauvegarder dans l'historique, le stockage local est plein.");
+            return prevHistory;
         });
     };
     
     const deleteFromHistory = useCallback((idToDelete: string) => {
         setHistory(prevHistory => {
             const updatedHistory = prevHistory.filter(entry => entry.id !== idToDelete);
-            updateLocalStorageHistory(updatedHistory);
-            return updatedHistory;
+            const finalHistory = saveHistorySafely(updatedHistory);
+
+            if (finalHistory !== null) {
+                return finalHistory;
+            }
+            return prevHistory;
         });
     }, []);
 
     const handleGenerate = useCallback(async () => {
-        if (!prompt || isLoading) return;
+        if (!prompt || isLoading || dailyUsage >= limit) return;
 
         let finalAspectRatio: AspectRatio | null = aspectRatio;
 
@@ -357,17 +242,26 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
         setGeneratedImages(null);
 
         const finalPrompt = modelStyle ? `${prompt}, style ${modelStyle}` : prompt;
+        const numericSeed = seed ? parseInt(seed, 10) : undefined;
 
         try {
-            const imageUrls = await generateImage(finalPrompt, negativePrompt, finalAspectRatio, numberOfImages, inputImageUrl);
+            const imagesToGenerate = inputImageUrls.length > 0 ? 1 : numberOfImages;
+            const imageUrls = await generateImage(finalPrompt, negativePrompt, finalAspectRatio, imagesToGenerate, inputImageUrls, numericSeed);
             setGeneratedImages(imageUrls);
-            addToHistory({ prompt, negativePrompt, aspectRatio: finalAspectRatio, modelStyle, inputImageUrl, numberOfImages }, imageUrls);
+            addToHistory({ prompt, negativePrompt, aspectRatio: finalAspectRatio, modelStyle, inputImageUrls, numberOfImages: imagesToGenerate, seed: numericSeed }, imageUrls);
+            onUsageUpdate(imagesToGenerate);
         } catch (e: any) {
             setError(e.message || "Une erreur inconnue est survenue.");
+            // If the error is a quota error, sync the UI gauge to the limit
+            if (e.isQuotaError) {
+                if (dailyUsage < limit) {
+                    onUsageUpdate(limit - dailyUsage);
+                }
+            }
         } finally {
             setIsLoading(false);
         }
-    }, [prompt, negativePrompt, aspectRatio, customWidth, customHeight, isLoading, modelStyle, inputImageUrl, numberOfImages]);
+    }, [prompt, negativePrompt, aspectRatio, customWidth, customHeight, isLoading, modelStyle, seed, inputImageUrls, numberOfImages, dailyUsage, limit, onUsageUpdate]);
     
     const handleReset = useCallback(() => {
         setPrompt('');
@@ -376,10 +270,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
         setCustomWidth('');
         setCustomHeight('');
         setModelStyle('');
+        setSeed('');
         setGeneratedImages(null);
         setError(null);
-        setInputImage(null);
-        setInputImageUrl(null);
+        setInputImages([]);
+        setInputImageUrls([]);
         setNumberOfImages(1);
         if (uploadInputRef.current) {
             uploadInputRef.current.value = '';
@@ -396,10 +291,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
         setCustomWidth('');
         setCustomHeight('');
         setModelStyle(entry.modelStyle || '');
+        setSeed(entry.seed ? String(entry.seed) : '');
         setGeneratedImages(entry.imageUrls || null);
-        setInputImageUrl(entry.inputImageUrl || null);
+        setInputImageUrls(entry.inputImageUrls || []);
         setNumberOfImages(entry.numberOfImages || 1);
-        setInputImage(null);
+        setInputImages([]);
     };
     
     const clearHistory = useCallback(() => {
@@ -416,6 +312,11 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
         const randomIndex = Math.floor(Math.random() * prompts.length);
         const randomPrompt = prompts[randomIndex];
         setPrompt(randomPrompt);
+    }, []);
+
+    const handleRandomSeed = useCallback(() => {
+        const randomSeed = Math.floor(Math.random() * 2147483647);
+        setSeed(String(randomSeed));
     }, []);
 
     const handleExportHistory = useCallback(() => {
@@ -449,15 +350,19 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                 const content = event.target?.result as string;
                 const importedHistory = JSON.parse(content);
 
-                // Basic validation
-                if (Array.isArray(importedHistory) && importedHistory.every(item => 'id' in item && 'prompt' in item && 'timestamp' in item)) {
-                    setHistory(importedHistory);
-                    updateLocalStorageHistory(importedHistory);
+                // FIX: Added robust validation to prevent crash on invalid history file (e.g., with null items).
+                if (Array.isArray(importedHistory) && importedHistory.every(item => item && typeof item === 'object' && 'id' in item && 'prompt' in item && 'timestamp' in item)) {
+                    const finalHistory = saveHistorySafely(importedHistory);
+                    if (finalHistory !== null) {
+                        setHistory(finalHistory);
+                    } else {
+                        throw new Error("Le stockage local est plein, impossible d'importer l'historique.");
+                    }
                 } else {
                     throw new Error("Format de fichier invalide.");
                 }
-            } catch (error) {
-                alert("Erreur: Le fichier est invalide ou corrompu et ne peut pas être importé.");
+            } catch (error: any) {
+                alert(`Erreur: ${error.message || "Le fichier est invalide ou corrompu et ne peut pas être importé."}`);
                 console.error("Erreur d'importation de l'historique:", error);
             }
         };
@@ -468,21 +373,35 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setInputImage(file);
+        const files = e.target.files;
+        if (files) {
+            const newFiles = Array.from(files);
+            const totalFiles = inputImageUrls.length + newFiles.length;
+    
+            if (totalFiles > MAX_INSPIRATION_IMAGES) {
+                alert(`Vous ne pouvez pas dépasser ${MAX_INSPIRATION_IMAGES} images d'inspiration.`);
+                if(e.target) e.target.value = '';
+                return;
+            }
+    
+            setInputImages(prev => [...prev, ...newFiles]);
             setNumberOfImages(1); // Force 1 image when using an input image
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setInputImageUrl(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    
+            newFiles.forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setInputImageUrls(prev => [...prev, reader.result as string]);
+                };
+                // FIX: Explicitly cast file to Blob to prevent type error where it's inferred as 'unknown'.
+                reader.readAsDataURL(file as Blob);
+            });
+            if(e.target) e.target.value = '';
         }
     };
 
-    const handleRemoveImage = () => {
-        setInputImage(null);
-        setInputImageUrl(null);
+    const handleRemoveImage = (indexToRemove: number) => {
+        setInputImages(prev => prev.filter((_, index) => index !== indexToRemove));
+        setInputImageUrls(prev => prev.filter((_, index) => index !== indexToRemove));
         if (uploadInputRef.current) {
             uploadInputRef.current.value = '';
         }
@@ -512,7 +431,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             <input 
                 type="file"
                 ref={importInputRef}
@@ -526,11 +445,30 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                 onChange={handleImageUpload}
                 className="hidden"
                 accept="image/*"
+                multiple
             />
             {/* Colonne de gauche: Panneau de contrôle */}
-            <div className="lg:col-span-1 flex flex-col gap-6">
-                <div className="bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg">
-                    <h2 className="text-2xl font-bold mb-4 text-sky-600 dark:text-sky-500">Panneau de Contrôle</h2>
+            <div className="lg:col-span-2 flex flex-col gap-6">
+                <div className="bg-bunker-100 dark:bg-bunker-900 p-4 sm:p-6 rounded-xl shadow-lg">
+                    <h2 className="text-2xl font-bold mb-4 text-sky-600 dark:text-sky-500 flex items-center gap-2">
+                        <span>Panneau de Contrôle</span>
+                        <HelpTooltip title="Comment utiliser le Générateur ?">
+                            <p>Suivez ces étapes pour donner vie à vos idées :</p>
+                            <ol>
+                                <li><strong>Instruction (Prompt) :</strong> Décrivez en détail ce que vous souhaitez créer. Soyez précis ! Utilisez le bouton 🎲 pour des idées.</li>
+                                <li><strong>Style :</strong> Choisissez un style prédéfini ou combinez-le avec votre prompt pour affiner le rendu artistique.</li>
+                                <li><strong>Options Avancées :</strong>
+                                    <ul>
+                                        <li><strong>Image(s) d'Inspiration :</strong> Importez jusqu'à {MAX_INSPIRATION_IMAGES} images pour guider l'IA.</li>
+                                        <li><strong>Prompt Négatif :</strong> Indiquez ce que vous ne voulez PAS voir (ex: <code>texte, flou</code>).</li>
+                                        <li><strong>Nombre & Format :</strong> Ajustez la quantité et les dimensions (désactivé si vous utilisez des images d'inspiration).</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Générer :</strong> Cliquez pour lancer la création. Vos images apparaîtront à droite.</li>
+                                <li><strong>Historique :</strong> Retrouvez vos créations passées en bas du panneau pour les recharger, télécharger ou supprimer.</li>
+                            </ol>
+                        </HelpTooltip>
+                    </h2>
                     
                     {/* Prompt Principal */}
                     <div className="space-y-2">
@@ -550,7 +488,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             placeholder="Ex: Un astronaute surfant sur une vague cosmique..."
-                            className="w-full h-32 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                            className="w-full h-32 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
                         />
                     </div>
 
@@ -561,7 +499,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                             id="model-style" 
                             value={modelStyle}
                             onChange={(e) => setModelStyle(e.target.value)} 
-                            className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                            className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
                          >
                             <option value="">Choisir un style...</option>
                             {models.map(group => (
@@ -595,110 +533,154 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                     </div>
 
                     {/* Options Avancées */}
-                    <div className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 space-y-4">
-                        <h3 className="text-lg font-semibold">Options Avancées</h3>
-                        <div>
-                            <label className="font-semibold">Image d'Inspiration (Optionnel)</label>
-                            <div 
-                                onClick={() => !inputImageUrl && uploadInputRef.current?.click()}
-                                className={`mt-2 w-full aspect-video rounded-lg border-2 border-dashed border-bunker-300 dark:border-bunker-700 flex items-center justify-center transition-colors ${!inputImageUrl ? 'cursor-pointer hover:bg-bunker-200 dark:hover:bg-bunker-800' : ''} relative overflow-hidden bg-bunker-200/50 dark:bg-bunker-800/50`}
-                            >
-                                {!inputImageUrl ? (
-                                    <div className="text-center text-bunker-500 dark:text-bunker-400">
-                                        <PhotoIcon className="w-10 h-10 mx-auto" />
-                                        <p className="mt-2 text-sm">Cliquez pour ajouter une image</p>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <img src={inputImageUrl} alt="Aperçu de l'image d'entrée" className="w-full h-full object-cover" />
+                     <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group">
+                        <summary className="list-none flex justify-between items-center cursor-pointer">
+                            <h3 className="text-lg font-semibold">Options Avancées</h3>
+                            <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
+                        </summary>
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label className="font-semibold">Image(s) d'Inspiration (Optionnel, {MAX_INSPIRATION_IMAGES} max.)</label>
+                                <div className="mt-2 w-full p-2 rounded-lg border-2 border-dashed border-bunker-300 dark:border-bunker-700 bg-bunker-200/50 dark:bg-bunker-800/50">
+                                    {inputImageUrls.length > 0 && (
+                                        <div className="grid grid-cols-3 gap-2 mb-2">
+                                            {inputImageUrls.map((url, index) => (
+                                                <div key={index} className="relative group aspect-square">
+                                                    <img src={url} alt={`Inspiration ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                                                    <button
+                                                        onClick={() => handleRemoveImage(index)}
+                                                        className="absolute top-1 right-1 p-1 bg-black/60 text-white rounded-full opacity-0 group-hover:opacity-100 hover:bg-black/80 transition-all duration-200"
+                                                        aria-label={`Supprimer l'image ${index + 1}`}
+                                                    >
+                                                        <XMarkIcon className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    
+                                    {inputImageUrls.length < MAX_INSPIRATION_IMAGES && (
                                         <button
-                                            onClick={handleRemoveImage}
-                                            className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
-                                            aria-label="Supprimer l'image"
+                                            onClick={() => uploadInputRef.current?.click()}
+                                            className="w-full py-3 px-4 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg flex items-center justify-center gap-2 hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors text-bunker-600 dark:text-bunker-300"
                                         >
-                                            <XMarkIcon className="w-5 h-5" />
+                                            <PhotoIcon className="w-5 h-5" />
+                                            <span>{inputImageUrls.length > 0 ? 'Ajouter une autre image' : 'Cliquez pour ajouter des images'}</span>
                                         </button>
-                                    </>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <label htmlFor="negative-prompt" className="font-semibold">Prompt Négatif</label>
-                            <input
-                                type="text"
-                                id="negative-prompt"
-                                value={negativePrompt}
-                                onChange={(e) => setNegativePrompt(e.target.value)}
-                                placeholder="Ex: mal dessiné, texte, flou..."
-                                className="w-full mt-2 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
-                            />
-                        </div>
-                        <div className={`${inputImageUrl ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                            <label htmlFor="number-of-images" className="font-semibold flex justify-between items-center">
-                                <span>Nombre d'images</span>
-                                <span className="font-bold text-sky-500">{numberOfImages}</span>
-                            </label>
-                            <input
-                                type="range"
-                                id="number-of-images"
-                                min="1"
-                                max="5"
-                                step="1"
-                                value={numberOfImages}
-                                onChange={(e) => setNumberOfImages(Number(e.target.value))}
-                                disabled={!!inputImageUrl}
-                                className="w-full mt-2 h-2 bg-bunker-200 dark:bg-bunker-700 rounded-lg appearance-none cursor-pointer accent-sky-600 disabled:accent-bunker-500"
-                            />
-                             {inputImageUrl && <p className="text-xs text-bunker-500 dark:text-bunker-400 mt-2">Une seule image peut être générée avec une image d'inspiration.</p>}
-                        </div>
-                        <div>
-                            <label className="font-semibold">Format de l'image</label>
-                            <div className={`grid grid-cols-5 gap-2 mt-2 ${inputImageUrl ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                {aspectRatios.map(ar => (
-                                    <button 
-                                        key={ar} 
-                                        onClick={() => handleAspectRatioSelect(ar)} 
-                                        disabled={!!inputImageUrl}
-                                        className={`py-2 rounded-lg text-sm transition ${aspectRatio === ar ? 'bg-sky-600 text-white font-bold ring-2 ring-sky-500' : 'bg-bunker-200 dark:bg-bunker-800 hover:bg-bunker-300 dark:hover:bg-bunker-700'}`}
-                                    >
-                                        {ar}
-                                    </button>
-                                ))}
-                            </div>
-                            <div className={`mt-3 grid grid-cols-[1fr_auto_1fr_auto] items-center gap-2 ${inputImageUrl ? 'opacity-50' : ''}`}>
+                            <div>
+                                <label htmlFor="negative-prompt" className="font-semibold">Prompt Négatif</label>
                                 <input
-                                    type="number"
-                                    placeholder="Largeur"
-                                    value={customWidth}
-                                    onChange={(e) => handleCustomDimChange(e, 'width')}
-                                    disabled={!!inputImageUrl}
-                                    className="w-full p-2 text-center bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition disabled:cursor-not-allowed"
-                                    aria-label="Largeur personnalisée en pixels"
+                                    type="text"
+                                    id="negative-prompt"
+                                    value={negativePrompt}
+                                    onChange={(e) => setNegativePrompt(e.target.value)}
+                                    placeholder="Ex: mal dessiné, texte, flou..."
+                                    className="w-full mt-2 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
                                 />
-                                <span className="font-semibold text-bunker-400">px</span>
-                                <input
-                                    type="number"
-                                    placeholder="Hauteur"
-                                    value={customHeight}
-                                    onChange={(e) => handleCustomDimChange(e, 'height')}
-                                    disabled={!!inputImageUrl}
-                                    className="w-full p-2 text-center bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition disabled:cursor-not-allowed"
-                                    aria-label="Hauteur personnalisée en pixels"
-                                />
-                                 <span className="font-semibold text-bunker-400">px</span>
                             </div>
-                            {inputImageUrl && <p className="text-xs text-bunker-500 dark:text-bunker-400 mt-2">Le format est déterminé par l'image d'inspiration.</p>}
+                            <div className={`${inputImageUrls.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <label htmlFor="number-of-images" className="font-semibold flex justify-between items-center">
+                                    <span>Nombre d'images</span>
+                                    <span className="font-bold text-sky-500">{numberOfImages}</span>
+                                </label>
+                                <input
+                                    type="range"
+                                    id="number-of-images"
+                                    min="1"
+                                    max="5"
+                                    step="1"
+                                    value={numberOfImages}
+                                    onChange={(e) => setNumberOfImages(Number(e.target.value))}
+                                    disabled={inputImageUrls.length > 0}
+                                    className="w-full mt-2 h-2 bg-bunker-200 dark:bg-bunker-700 rounded-lg appearance-none cursor-pointer accent-sky-600 disabled:accent-bunker-500"
+                                />
+                                 {inputImageUrls.length > 0 && <p className="text-xs text-bunker-500 dark:text-bunker-400 mt-2">Une seule image peut être générée avec une ou plusieurs images d'inspiration.</p>}
+                            </div>
+                            <div>
+                                <label className="font-semibold">Format de l'image</label>
+                                <div className={`flex flex-wrap gap-2 mt-2 ${inputImageUrls.length > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                    {aspectRatios.map(ar => (
+                                        <button 
+                                            key={ar} 
+                                            onClick={() => handleAspectRatioSelect(ar)} 
+                                            disabled={inputImageUrls.length > 0}
+                                            className={`py-2 px-3 rounded-lg text-sm transition-colors flex-1 ${aspectRatio === ar ? 'bg-sky-600 text-white font-bold ring-2 ring-sky-500' : 'bg-bunker-200 dark:bg-bunker-800 hover:bg-bunker-300 dark:hover:bg-bunker-700'}`}
+                                        >
+                                            {ar}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className={`mt-3 grid grid-cols-[1fr_auto_1fr_auto] items-center gap-2 ${inputImageUrls.length > 0 ? 'opacity-50' : ''}`}>
+                                    <input
+                                        type="number"
+                                        placeholder="Largeur"
+                                        value={customWidth}
+                                        onChange={(e) => handleCustomDimChange(e, 'width')}
+                                        disabled={inputImageUrls.length > 0}
+                                        className="w-full p-2 text-center bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition disabled:cursor-not-allowed"
+                                        aria-label="Largeur personnalisée en pixels"
+                                    />
+                                    <span className="font-semibold text-bunker-400">px</span>
+                                    <input
+                                        type="number"
+                                        placeholder="Hauteur"
+                                        value={customHeight}
+                                        onChange={(e) => handleCustomDimChange(e, 'height')}
+                                        disabled={inputImageUrls.length > 0}
+                                        className="w-full p-2 text-center bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition disabled:cursor-not-allowed"
+                                        aria-label="Hauteur personnalisée en pixels"
+                                    />
+                                     <span className="font-semibold text-bunker-400">px</span>
+                                </div>
+                                {inputImageUrls.length > 0 && <p className="text-xs text-bunker-500 dark:text-bunker-400 mt-2">Le format est déterminé par l'IA lors de l'utilisation d'images d'inspiration.</p>}
+                            </div>
                         </div>
-                    </div>
+                    </details>
                     
-                    <div className="mt-8">
+                    {/* Paramètres Avancés */}
+                    <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group">
+                        <summary className="list-none flex justify-between items-center cursor-pointer">
+                            <h3 className="text-lg font-semibold">Paramètres Avancés</h3>
+                            <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
+                        </summary>
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label htmlFor="seed" className="font-semibold flex justify-between items-center">
+                                    <span>Seed de génération</span>
+                                    <button
+                                        onClick={handleRandomSeed}
+                                        className="flex items-center gap-1.5 text-sm font-medium text-sky-600 dark:text-sky-500 hover:text-sky-700 dark:hover:text-sky-400 transition-colors"
+                                        title="Générer une seed aléatoire"
+                                    >
+                                        <DiceIcon className="w-4 h-4" />
+                                        <span>Aléatoire</span>
+                                    </button>
+                                </label>
+                                <input
+                                    type="number"
+                                    id="seed"
+                                    value={seed}
+                                    onChange={(e) => setSeed(e.target.value.replace(/[^0-9]/g, ''))}
+                                    placeholder="Laisser vide pour aléatoire"
+                                    className="w-full mt-2 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                                />
+                                <p className="text-xs text-bunker-500 dark:text-bunker-400 mt-1">Utiliser la même seed avec le même prompt produira des images similaires.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <div className="mt-8 space-y-4">
                         <button 
                             onClick={handleReset} 
-                            className="w-full mb-4 py-2 px-4 bg-bunker-500 text-bunker-100 font-semibold rounded-lg hover:bg-bunker-600 dark:bg-bunker-700 dark:hover:bg-bunker-600 transition-colors shadow-md"
+                            className="w-full py-2 px-4 bg-bunker-500 text-bunker-100 font-semibold rounded-lg hover:bg-bunker-600 dark:bg-bunker-700 dark:hover:bg-bunker-600 transition-colors shadow-md"
                         >
                             Réinitialiser
                         </button>
-                        <button onClick={handleGenerate} disabled={isLoading || !prompt} className="w-full py-3 px-4 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 dark:disabled:bg-bunker-600 disabled:cursor-not-allowed transition-transform duration-200 transform hover:scale-105 shadow-lg">
+
+                        <button onClick={handleGenerate} disabled={isLoading || !prompt || dailyUsage >= limit} className="w-full py-3 px-4 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 dark:disabled:bg-bunker-600 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 shadow-lg">
                             {isLoading ? (
                                 <>
                                     <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
@@ -707,21 +689,26 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                             ) : (
                                 <>
                                     <SparklesIcon className="w-6 h-6" />
-                                    <span>Générer {numberOfImages > 1 ? `les ${numberOfImages} images` : "l'Image"}</span>
+                                    <span>Générer {inputImageUrls.length > 0 ? "l'Image" : (numberOfImages > 1 ? `les ${numberOfImages} images` : "l'Image")}</span>
                                 </>
                             )}
                         </button>
+                        {dailyUsage >= limit && (
+                            <p className="text-center text-sm font-semibold text-red-500">
+                                Limite de génération quotidienne gratuite atteinte.
+                            </p>
+                        )}
                     </div>
                 </div>
 
                  {/* Historique */}
-                 {history.length > 0 && (
-                    <div className="bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-xl font-bold">Historique</h3>
-                            <div className="flex items-center gap-1">
+                <details className="bg-bunker-100 dark:bg-bunker-900 p-4 sm:p-6 rounded-xl shadow-lg group" open={history.length > 0}>
+                    <summary className="list-none flex justify-between items-center cursor-pointer mb-4">
+                         <h3 className="text-xl font-bold">Historique</h3>
+                         <div className="flex items-center">
+                            <div className="flex items-center gap-1 mr-2">
                                 <button
-                                    onClick={handleImportClick}
+                                    onClick={(e) => { e.stopPropagation(); handleImportClick(); }}
                                     aria-label="Importer un historique"
                                     title="Importer un historique"
                                     className="p-1.5 rounded-full text-bunker-500 hover:text-sky-500 dark:text-bunker-400 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors duration-200"
@@ -729,7 +716,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                                     <ArrowDownOnSquareIcon className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={handleExportHistory}
+                                    onClick={(e) => { e.stopPropagation(); handleExportHistory(); }}
                                     aria-label="Exporter l'historique"
                                     title="Exporter l'historique"
                                     className="p-1.5 rounded-full text-bunker-500 hover:text-sky-500 dark:text-bunker-400 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors duration-200"
@@ -737,7 +724,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                                     <ArrowUpOnSquareIcon className="w-5 h-5" />
                                 </button>
                                 <button 
-                                    onClick={clearHistory} 
+                                    onClick={(e) => { e.stopPropagation(); clearHistory(); }}
                                     aria-label="Vider tout l'historique" 
                                     title="Vider tout l'historique"
                                     className="p-1.5 rounded-full text-bunker-500 hover:text-red-500 dark:text-bunker-400 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors duration-200"
@@ -745,49 +732,52 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                                     <TrashIcon className="w-5 h-5" />
                                 </button>
                             </div>
+                            <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
                         </div>
-                        <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
-                            {history.map(entry => (
-                                <div key={entry.id} className="p-2 bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition flex items-center justify-between gap-3">
-                                    <div onClick={() => loadFromHistory(entry)} className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                                        {entry.imageUrls && entry.imageUrls[0] && <img src={entry.imageUrls[0]} alt="aperçu" className="w-10 h-10 object-cover rounded-md flex-shrink-0" />}
-                                        <p className="text-sm truncate">{entry.prompt}</p>
-                                    </div>
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                        <a 
-                                            href={entry.imageUrls?.[0]} 
-                                            download={`creation-ia-${entry.id.substring(0, 8)}.jpg`}
-                                            onClick={(e) => e.stopPropagation()}
-                                            title="Télécharger la première image"
-                                            className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
-                                        >
-                                            <DownloadIcon className="w-5 h-5" />
-                                        </a>
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); onSendToEditor(entry.imageUrls![0]); }}
-                                            title="Envoyer la première image vers l'éditeur"
-                                            className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
-                                        >
-                                            <ArrowRightIcon className="w-5 h-5" />
-                                        </button>
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); deleteFromHistory(entry.id); }}
-                                            title="Supprimer de l'historique"
-                                            className="p-2 rounded-full text-bunker-600 hover:text-red-500 dark:text-bunker-300 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                                        >
-                                            <TrashIcon className="w-5 h-5" />
-                                        </button>
-                                    </div>
+                    </summary>
+                    <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
+                        {history.length === 0 ? (
+                            <p className="text-sm text-center text-bunker-500 dark:text-bunker-400 py-4">Votre historique est vide.</p>
+                        ) : history.map(entry => (
+                            <div key={entry.id} className="p-2 bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors flex items-center justify-between gap-3">
+                                <div onClick={() => loadFromHistory(entry)} className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                                    {entry.imageUrls && entry.imageUrls[0] && <img src={entry.imageUrls[0]} alt="aperçu" className="w-10 h-10 object-cover rounded-md flex-shrink-0" />}
+                                    <p className="text-sm truncate">{entry.prompt}</p>
                                 </div>
-                            ))}
-                        </div>
+                                <div className="flex items-center gap-1 flex-shrink-0">
+                                    <a 
+                                        href={entry.imageUrls?.[0]} 
+                                        download={`creation-ia-${entry.id.substring(0, 8)}.jpg`}
+                                        onClick={(e) => e.stopPropagation()}
+                                        title="Télécharger la première image"
+                                        className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                                    >
+                                        <DownloadIcon className="w-5 h-5" />
+                                    </a>
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); onSendToEditor(entry.imageUrls![0]); }}
+                                        title="Envoyer la première image vers l'éditeur"
+                                        className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                                    >
+                                        <ArrowRightIcon className="w-5 h-5" />
+                                    </button>
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); deleteFromHistory(entry.id); }}
+                                        title="Supprimer de l'historique"
+                                        className="p-2 rounded-full text-bunker-600 hover:text-red-500 dark:text-bunker-300 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                    >
+                                        <TrashIcon className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                )}
+                </details>
             </div>
 
             {/* Colonne de droite: Affichage de l'image */}
-            <div className="lg:col-span-2 bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg flex items-center justify-center min-h-[400px] lg:min-h-0">
-                <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-bunker-300 dark:border-bunker-700 rounded-lg p-4">
+            <div className="lg:col-span-3 bg-bunker-100 dark:bg-bunker-900 p-4 sm:p-6 rounded-xl shadow-lg flex items-center justify-center min-h-[400px] lg:min-h-0">
+                <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-bunker-300 dark:border-bunker-700 rounded-lg p-4 transition-all duration-300">
                     {isLoading && (
                         <div className="text-center">
                             <div className="w-12 h-12 border-4 border-t-transparent border-sky-500 rounded-full animate-spin mx-auto"></div>
@@ -795,7 +785,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                             <p className="text-sm text-bunker-500 dark:text-bunker-400">La création peut prendre un moment.</p>
                         </div>
                     )}
-                    {error && <p className="text-red-500 font-semibold">{error}</p>}
+                    {error && <p className="text-red-500 font-semibold text-center">{error}</p>}
                     {!isLoading && !error && generatedImages && generatedImages.length > 0 && (
                         <div className="w-full h-full overflow-y-auto">
                              <div className={`grid gap-4 ${generatedImages.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
@@ -822,7 +812,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor }) => {
                         <div className="text-center text-bunker-500 dark:text-bunker-400">
                              <SparklesIcon className="w-16 h-16 mx-auto text-bunker-400 dark:text-bunker-600"/>
                             <h3 className="mt-4 text-xl font-semibold">Votre création apparaîtra ici</h3>
-                            <p className="mt-1">Remplissez les options et cliquez sur "Générer".</p>
+                            <p className="mt-1">Laissez libre cours à votre imagination et cliquez sur "Générer".</p>
                         </div>
                     )}
                 </div>
