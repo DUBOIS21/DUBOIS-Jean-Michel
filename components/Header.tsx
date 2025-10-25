@@ -40,6 +40,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, vTexteLoadStat
     { id: Tab.GENERATOR, label: 'GENERATEUR', icon: <SparklesIcon className="w-5 h-5" /> },
     { id: Tab.EDITOR, label: 'EDITEUR', icon: <PencilIcon className="w-5 h-5" /> },
     { id: Tab.PROMPT_BUILDER, label: 'CREATEUR', icon: <PhotoIcon className="w-5 h-5" /> },
+    { id: Tab.V_STYLES, label: 'V-STYLES', icon: <SquaresPlusIcon className="w-5 h-5" /> },
     { id: Tab.V_TEXTE, label: 'V-TEXTE', icon: <SquaresPlusIcon className="w-5 h-5" /> },
     { id: Tab.V_IMAGE, label: 'V-IMAGE', icon: <PhotoIcon className="w-5 h-5" /> },
     { id: Tab.VIDEO, label: 'VIDEO', icon: <VideoCameraIcon className="w-5 h-5" /> },

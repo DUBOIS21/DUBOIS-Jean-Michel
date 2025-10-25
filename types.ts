@@ -2,6 +2,7 @@ export enum Tab {
   GENERATOR = 'generator',
   EDITOR = 'editor',
   PROMPT_BUILDER = 'prompt-builder',
+  V_STYLES = 'v-styles',
   V_TEXTE = 'v-texte',
   V_IMAGE = 'v-image',
   VIDEO = 'video',
