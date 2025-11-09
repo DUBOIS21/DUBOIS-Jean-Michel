@@ -43,6 +43,29 @@ const handleApiError = (error: any): Error => {
     return new Error("Une erreur inattendue est survenue avec l'API. La console contient plus de détails techniques.");
 }
 
+export const enhancePrompt = async (prompt: string): Promise<string> => {
+    try {
+        const systemInstruction = "Vous êtes un ingénieur prompt expert pour un générateur d'images IA. Prenez l'idée simple de l'utilisateur et développez-la en un prompt riche, descriptif et artistique. Incluez des détails sur le style (ex: 'art numérique', 'peinture à l'huile', 'cinématographique'), l'éclairage (ex: 'lumière douce du matin', 'contre-jour dramatique'), et la composition (ex: 'gros plan', 'grand angle'). Répondez UNIQUEMENT avec le nouveau prompt, sans texte d'introduction.";
+
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                systemInstruction: systemInstruction,
+            },
+        });
+
+        if (response.text) {
+            return response.text.trim();
+        }
+
+        throw new Error("L'API n'a pas retourné de texte pour l'amélioration du prompt.");
+
+    } catch (error) {
+        throw handleApiError(error);
+    }
+};
+
 export const generateImage = async (prompt: string, negativePrompt: string, aspectRatio: AspectRatio, numberOfImages: number, inputImages?: string[] | null, seed?: number): Promise<string[]> => {
   const fullPrompt = negativePrompt ? `${prompt}. Ne pas inclure : ${negativePrompt}` : prompt;
   

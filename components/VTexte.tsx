@@ -3,54 +3,28 @@ import { generateImage } from '../services/geminiService';
 import { SparklesIcon, DownloadIcon, XCircleIcon, PlusCircleIcon, TrashIcon, ArrowDownOnSquareIcon, ArrowUpOnSquareIcon, MagnifyingGlassIcon } from './Icons';
 import HelpTooltip from './HelpTooltip';
 import ImagePreviewModal from './ImagePreviewModal';
-import ConfirmationModal from './ConfirmationModal';
+import { useVHistory } from '../hooks/useVHistory';
+import VHistory from './VHistory';
+import { VHistoryEntry } from '../types';
 
 const defaultInspirationModules = [
     {
-        id: 'monde-miniature',
-        title: 'Monde Miniature',
-        template: "Photographie macro d'un monde miniature complexe et détaillé représentant [SUJET]. La scène est construite à l'aide de matériaux du quotidien réutilisés de manière créative. Éclairage de studio dramatique, faible profondeur de champ créant un effet tilt-shift, couleurs vives et saturées, hyper-détaillé, mise au point sélective, composition impeccable. Style de Tatsuya Tanaka.",
-        placeholder: "Ex: un combat de chevaliers...",
+        id: 'plushie',
+        title: '"CHOSE" EN PELUCHE',
+        template: "Créez une affiche CGI hyperréaliste d'une [IMAGE1] avec sa queue, une peluche à la fourrure longue et soyeuse, douce et élégante. Tous les autres éléments, comme la tige et les feuilles, sont photoréalistes. Utilisez une palette de couleurs douces. La composition est minimaliste, sur un fond clair avec un éclairage doux et diffus pour une esthétique épurée et élégante.",
+        placeholder: "Ex: Rose, renard, livre...",
         isCustom: false,
     },
     {
-        id: 'creature-steampunk',
-        title: 'Créature Steampunk',
-        template: "Portrait en gros plan d'un [SUJET] mécanique de style steampunk. La créature est faite d'engrenages en laiton, de tuyaux en cuivre et de détails complexes. Des lueurs de vapeur s'échappent des joints. L'arrière-plan est un atelier victorien encombré avec des outils et des plans. Éclairage volumétrique chaud provenant d'une lampe à gaz, textures métalliques réalistes, rendu Octane, très détaillé, 4k, art conceptuel cinématique.",
-        placeholder: "Ex: un hibou, un dragon...",
-        isCustom: false,
-    },
-    {
-        id: 'scene-neo-noir',
-        title: 'Scène Néo-Noir',
-        template: "Une scène de film noir se déroulant dans une ruelle pluvieuse d'une mégalopole cyberpunk en 2088. Un [SUJET] est le point central, illuminé par des enseignes au néon holographiques projetant des reflets colorés sur le sol mouillé. Ambiance maussade et mystérieuse, fumée dense, style Blade Runner, éclairage cinématique, ombres profondes, couleurs contrastées (bleu froid et rose vif), photographie de rue, objectif anamorphique.",
-        placeholder: "Ex: un détective privé...",
-        isCustom: false,
-    },
-    {
-        id: 'nature-bioluminescente',
-        title: 'Nature Bioluminescente',
-        template: "Une photographie de nature fantastique d'un [SUJET] dans une forêt extraterrestre la nuit. La flore et la faune environnantes émettent une lumière bioluminescente douce et éthérée (bleu, vert, violet). Des particules de poussière magiques flottent dans l'air. L'atmosphère est onirique et enchantée. Longue exposition, couleurs vibrantes, détails incroyables, style Avatar de James Cameron, ambiance mystique.",
-        placeholder: "Ex: un cerf majestueux...",
-        isCustom: false,
-    },
-    {
-        id: 'art-gastronomique',
-        title: 'Art Gastronomique',
-        template: "Photographie culinaire de style haute gastronomie, un [SUJET] transformé en un dessert complexe et élégant. Le plat est présenté sur une assiette en ardoise, avec des garnitures délicates comme des fleurs comestibles, des gouttes de coulis et de la poussière d'or. L'éclairage est doux et directionnel pour accentuer les textures. Arrière-plan sombre et minimaliste, très faible profondeur de champ, hyper-détaillé, qualité magazine.",
-        placeholder: "Ex: un volcan en éruption...",
-        isCustom: false,
-    },
-    {
-        id: 'art-du-papier',
-        title: 'Art du Papier (Kirigami)',
-        template: "Une œuvre d'art complexe entièrement réalisée en papier découpé (style kirigami). La scène représente un [SUJET] avec des détails incroyablement fins et des couches de papier superposées pour créer de la profondeur. La composition est centrée et symétrique, le tout dans une seule couleur de papier, posé sur un fond contrasté. Éclairage latéral pour créer des ombres longues et mettre en valeur les découpes, très détaillé, minimaliste, élégant.",
-        placeholder: "Ex: un paysage de montagne...",
+        id: 'food',
+        title: 'DEMI FRUIT+CUBE',
+        template: "Photographie culinaire minimaliste, [IMAGE1] repose sur une surface légère et mate et est capturé au milieu de sa transformation en une forme pixelisée 3D : une moitié reste intacte tandis que l'autre se fragmente organiquement en grands cubes flottants qui dérivent vers l'extérieur, chaque cube révélant la texture, les ingrédients et les couleurs de l'objet ; éclairage de studio avec des ombres douces et réalistes, faible profondeur de champ, perspective et composition de bon goût, détails hyperréalistes, abstraction géométrique élégante, flou de mouvement subtil sur les cubes, haute résolution, gros plan cinématographique",
+        placeholder: "Ex: Un croissant, une fraise...",
         isCustom: false,
     }
 ];
 
-const DEFAULT_MODULE_ID = defaultInspirationModules.length > 0 ? defaultInspirationModules[0].id : '';
+const DEFAULT_MODULE_ID = defaultInspirationModules[0].id;
 
 const useGenericItems = (storageKey: string, defaultItems: any[]) => {
     const getInitialItems = useCallback(() => {
@@ -58,7 +32,9 @@ const useGenericItems = (storageKey: string, defaultItems: any[]) => {
             const savedCustomItems = localStorage.getItem(storageKey);
             if (savedCustomItems) {
                 const parsed = JSON.parse(savedCustomItems);
-                if (Array.isArray(parsed)) return [...defaultItems, ...parsed];
+                if (Array.isArray(parsed)) {
+                    return [...defaultItems, ...parsed];
+                }
             }
         } catch (e) {
             console.error(`Impossible de charger les items depuis ${storageKey}:`, e);
@@ -72,14 +48,22 @@ const useGenericItems = (storageKey: string, defaultItems: any[]) => {
     useEffect(() => {
         const customItems = items.filter(m => m.isCustom);
         try {
-            localStorage.setItem(storageKey, JSON.stringify(customItems));
+            if (customItems.length > 0) {
+                localStorage.setItem(storageKey, JSON.stringify(customItems));
+            } else {
+                localStorage.removeItem(storageKey);
+            }
         } catch(e) {
             console.error(`Impossible de sauvegarder les items dans ${storageKey}:`, e);
         }
     }, [items, storageKey]);
 
     const addItem = useCallback((itemData: { title: string; [key: string]: any; }) => {
-        const newItem = { id: crypto.randomUUID(), ...itemData, isCustom: true };
+        const newItem = {
+            id: crypto.randomUUID(),
+            ...itemData,
+            isCustom: true,
+        };
         setItems(prev => [...prev, newItem]);
         return newItem;
     }, []);
@@ -90,150 +74,154 @@ const useGenericItems = (storageKey: string, defaultItems: any[]) => {
 
     const importItems = useCallback((fileContent: string) => {
         try {
-            const imported = JSON.parse(fileContent);
-            if (!Array.isArray(imported) || !imported.every(i => 'title' in i && 'template' in i)) throw new Error("Format invalide.");
+            const importedItems = JSON.parse(fileContent);
+
+            if (!Array.isArray(importedItems) || !importedItems.every(item => 'title' in item && 'template' in item)) {
+                 throw new Error("Format de fichier invalide. Le fichier doit être un tableau d'objets avec les clés: title, template.");
+            }
+
             setItems(prev => {
-                const existing = new Set(prev.map(m => m.title));
-                const newItems = imported.filter((i: any) => !existing.has(i.title)).map((i: any) => ({ ...i, id: crypto.randomUUID(), isCustom: true }));
-                if (newItems.length > 0) alert(`${newItems.length} module(s) importé(s) !`); else alert("Aucun nouveau module importé (les modules avec des titres déjà existants ont été ignorés).");
+                const existingCustomTitles = prev.filter(m => m.isCustom).map(m => m.title);
+                const newItems = importedItems
+                    .filter((imported: any) => 'title' in imported && !existingCustomTitles.includes(imported.title))
+                    .map((imported: any) => ({
+                        ...imported,
+                        id: crypto.randomUUID(),
+                        isCustom: true,
+                    }));
+                
+                if (newItems.length > 0) {
+                    alert(`${newItems.length} module(s) importé(s) avec succès !`);
+                } else {
+                    alert("Aucun nouveau module à importer. Les modules avec des titres existants ont été ignorés.");
+                }
+                
                 return [...prev, ...newItems];
             });
+
         } catch (error: any) {
-            alert(`Erreur: ${error.message || "Fichier invalide."}`);
+            alert(`Erreur: ${error.message || "Le fichier est invalide ou corrompu et ne peut pas être importé."}`);
+            console.error("Erreur d'importation:", error);
         }
     }, []);
 
     const exportItems = useCallback((downloadName: string) => {
-        if (items.length === 0) {
-            alert("Il n'y a aucun module à exporter.");
+        const customItems = items.filter(m => m.isCustom);
+        if (customItems.length === 0) {
+            alert("Il n'y a aucun module personnalisé à exporter.");
             return;
         }
-        const dataStr = JSON.stringify(items.map(({id, isCustom, ...rest}) => rest), null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = downloadName;
-        a.click();
+        const dataStr = JSON.stringify(customItems.map(({id, isCustom, ...rest}) => rest), null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = downloadName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         URL.revokeObjectURL(url);
     }, [items]);
 
-    const mergeRemoteItems = useCallback((remoteItems: any[]) => {
-        if (!Array.isArray(remoteItems)) return;
-        setItems(prevItems => {
-            const existingTitles = new Set(prevItems.map(item => item.title));
-            const newItems = remoteItems
-                .filter(remoteItem => remoteItem.title && !existingTitles.has(remoteItem.title))
-                .map(remoteItem => ({
-                    ...remoteItem,
-                    id: crypto.randomUUID(),
-                    isCustom: false,
-                }));
-            return [...prevItems, ...newItems];
-        });
-    }, []);
-
-    return { items, addItem, deleteItem, importItems, exportItems, mergeRemoteItems };
+    return { items, addItem, deleteItem, importItems, exportItems };
 };
 
 interface VTexteProps {
     onUsageUpdate: (count: number) => void;
     onSendToEditor: (imageUrl: string) => void;
     onLoadComplete: (status: 'success' | 'error') => void;
+    dailyUsage: number;
+    limit: number;
 }
 
-const VTexte: React.FC<VTexteProps> = ({ onUsageUpdate, onSendToEditor, onLoadComplete }) => {
+
+const VTexte: React.FC<VTexteProps> = ({ onUsageUpdate, onSendToEditor, onLoadComplete, dailyUsage, limit }) => {
     const importModulesInputRef = useRef<HTMLInputElement>(null);
-    const { items: modules, addItem: addModule, deleteItem: deleteModule, importItems: importModules, exportItems: exportModules, mergeRemoteItems } = useGenericItems('customInspirationModules', defaultInspirationModules);
+    const { items: modules, addItem: addModule, deleteItem: deleteModule, importItems: importModules, exportItems: exportModules } = useGenericItems('customInspirationModules', defaultInspirationModules);
+    const { history, addToHistory, deleteFromHistory, clearHistory, exportHistory, importInputRef: historyImportRef, handleImportFile, isConfirmingClear, setIsConfirmingClear } = useVHistory('vTexteHistory');
 
     const [selectedModuleId, setSelectedModuleId] = useState(DEFAULT_MODULE_ID);
     const [moduleInput, setModuleInput] = useState('');
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isModuleLoading, setIsModuleLoading] = useState(false);
+    const [moduleError, setModuleError] = useState<string | null>(null);
     
-    const [editableTemplate, setEditableTemplate] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newModuleTitle, setNewModuleTitle] = useState('');
     const [newModuleTemplate, setNewModuleTemplate] = useState('');
     const [newModuleError, setNewModuleError] = useState('');
-
-    const [moduleToDelete, setModuleToDelete] = useState<any | null>(null);
-    const [remoteModuleStatus, setRemoteModuleStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     
     useEffect(() => {
-        const fetchRemoteModules = async () => {
-            setRemoteModuleStatus('loading');
-            try {
-                const fileId = '1Poy99Tq3W4fNkcnlxof6wj4LM1bDa-Qa';
-                const directDownloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-                const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(directDownloadUrl)}`;
-
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
-                }
-                const remoteModules = await response.json();
-                mergeRemoteItems(remoteModules);
-                setRemoteModuleStatus('success');
-                onLoadComplete('success');
-            } catch (err) {
-                console.error("Impossible de charger les modules V-TEXTE distants:", err);
-                setRemoteModuleStatus('error');
-                onLoadComplete('error');
-            }
-        };
-
-        if (remoteModuleStatus === 'idle') {
-            fetchRemoteModules();
+        try {
+            onLoadComplete('success');
+        } catch(e) {
+            onLoadComplete('error');
         }
-    }, [remoteModuleStatus, mergeRemoteItems, onLoadComplete]);
+    }, [onLoadComplete]);
 
     useEffect(() => {
         const selectedExists = modules.some(m => m.id === selectedModuleId);
         if (!selectedExists) {
-            setSelectedModuleId(modules.length > 0 ? modules[0].id : '');
+            setSelectedModuleId(DEFAULT_MODULE_ID);
         }
     }, [modules, selectedModuleId]);
 
-    const activeModule = useMemo(() => modules.find(m => m.id === selectedModuleId), [selectedModuleId, modules]);
+    const activeModule = useMemo(() => 
+        modules.find(m => m.id === selectedModuleId),
+    [selectedModuleId, modules]);
+
+    const handleGenerateModuleImage = useCallback(async () => {
+        if (!moduleInput || !activeModule) return;
     
-    useEffect(() => {
-        if (activeModule) {
-            setEditableTemplate(activeModule.template);
-        } else {
-            setEditableTemplate('');
-        }
-    }, [activeModule]);
-
-    const finalPrompt = useMemo(() => {
-        if (!activeModule) return '';
-        return editableTemplate.replace(/\[SUJET\]/gi, moduleInput || '[SUJET]');
-    }, [editableTemplate, moduleInput, activeModule]);
-
-    const handleGenerate = useCallback(async () => {
-        if (!finalPrompt || !moduleInput) return;
-        setIsLoading(true);
-        setError(null);
+        setIsModuleLoading(true);
+        setModuleError(null);
         setGeneratedImage(null);
+    
+        const finalPrompt = activeModule.template.replace(/\[IMAGE1\]/g, moduleInput);
+    
         try {
             const imageUrls = await generateImage(finalPrompt, '', '1:1', 1);
             if (imageUrls.length > 0) {
-                setGeneratedImage(imageUrls[0]);
+                const generatedImageUrl = imageUrls[0];
+                setGeneratedImage(generatedImageUrl);
                 onUsageUpdate(1);
-            } else throw new Error("L'API n'a retourné aucune image.");
+                addToHistory({
+                    moduleId: activeModule.id,
+                    userInput: moduleInput,
+                    finalPrompt,
+                    generatedImageUrl,
+                });
+            } else {
+                throw new Error("L'API n'a retourné aucune image.");
+            }
         } catch (e: any) {
-            setError(e.message || "Une erreur est survenue.");
+            setModuleError(e.message || "Une erreur est survenue lors de la génération de l'image.");
         } finally {
-            setIsLoading(false);
+            setIsModuleLoading(false);
         }
-    }, [finalPrompt, moduleInput, onUsageUpdate]);
+    }, [moduleInput, activeModule, onUsageUpdate, addToHistory]);
 
     const handleSaveNewModule = () => {
-        if (!newModuleTitle.trim()) { setNewModuleError('Le titre est requis.'); return; }
-        if (!newModuleTemplate.trim().includes('[SUJET]')) { setNewModuleError("Le modèle doit contenir la variable [SUJET]."); return; }
-        const newModule = addModule({ title: newModuleTitle.trim(), template: newModuleTemplate.trim(), placeholder: 'Votre texte ici...' });
+        if (!newModuleTitle.trim()) {
+            setNewModuleError('Le titre ne peut pas être vide.');
+            return;
+        }
+        if (!newModuleTemplate.trim()) {
+            setNewModuleError('Le modèle de prompt ne peut pas être vide.');
+            return;
+        }
+        if (!newModuleTemplate.includes('[IMAGE1]')) {
+            setNewModuleError("Le modèle de prompt doit contenir la variable [IMAGE1].");
+            return;
+        }
+
+        const newModule = addModule({ 
+            title: newModuleTitle.trim(), 
+            template: newModuleTemplate.trim(), 
+            placeholder: 'Votre texte ici...' 
+        });
+
         setSelectedModuleId(newModule.id);
         setIsAddModalOpen(false);
         setNewModuleTitle('');
@@ -241,168 +229,223 @@ const VTexte: React.FC<VTexteProps> = ({ onUsageUpdate, onSendToEditor, onLoadCo
         setNewModuleError('');
     };
 
-    const handleDeleteClick = () => {
-        if (activeModule?.isCustom) {
-            setModuleToDelete(activeModule);
-        }
-    };
-
-    const handleConfirmDelete = () => {
-        if (moduleToDelete) {
-            deleteModule(moduleToDelete.id);
-            setModuleToDelete(null);
+    const handleDeleteSelectedModule = () => {
+        if (!activeModule?.isCustom) return;
+    
+        if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement ce module ?")) {
+            deleteModule(selectedModuleId);
         }
     };
     
-    const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImportModulesFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => importModules(event.target?.result as string);
-            reader.readAsText(file);
-            e.target.value = '';
-        }
+        if (!file) return;
+    
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const content = event.target?.result as string;
+            importModules(content);
+        };
+        reader.readAsText(file);
+        if(e.target) e.target.value = '';
+    };
+
+    const handleLoadFromHistory = (entry: VHistoryEntry) => {
+        setSelectedModuleId(entry.moduleId);
+        setModuleInput(entry.userInput);
+        setGeneratedImage(entry.generatedImageUrl);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     useEffect(() => {
         setModuleInput('');
         setGeneratedImage(null);
-        setError(null);
+        setModuleError(null);
     }, [selectedModuleId]);
 
     return (
-        <div className="space-y-8">
-            <input type="file" ref={importModulesInputRef} onChange={handleImportFile} className="hidden" accept=".json" />
+        <div className="container mx-auto space-y-12">
+            <input
+                type="file"
+                ref={importModulesInputRef}
+                onChange={handleImportModulesFile}
+                className="hidden"
+                accept=".json"
+            />
+             <input
+                type="file"
+                ref={historyImportRef}
+                onChange={handleImportFile}
+                className="hidden"
+                accept=".json"
+            />
             <div className="text-center">
                 <h1 className="text-3xl sm:text-4xl font-bold text-sky-600 dark:text-sky-500 inline-flex items-center gap-2">
-                    <span>V-TEXTE · Création par Modèle</span>
-                     <HelpTooltip title="Comment utiliser V-TEXTE ?">
-                       <p>Les modules sont des modèles de prompts avancés pour créer des images complexes et stylisées très facilement.</p>
+                    <span>Modules de Prompts par Texte</span>
+                     <HelpTooltip title="Que sont les Modules ?">
+                       <p>Les modules sont des modèles de prompts avancés. Ils permettent de créer des images complexes et stylisées très facilement.</p>
                        <ol>
-                           <li><strong>Choisissez un module</strong> dans la liste. Son modèle de prompt s'affichera.</li>
-                           <li><strong>Remplissez le champ "Sujet"</strong> (ex: <code>un chat</code>) pour remplacer la variable <code>[SUJET]</code>.</li>
-                           <li><strong>Visualisez et modifiez l'aperçu du prompt final</strong> pour voir et ajuster exactement ce que l'IA recevra.</li>
-                           <li><strong>Cliquez sur "Générer"</strong> et admirez le résultat !</li>
-                           <li><strong>Personnalisez :</strong> Créez vos propres modules avec ➕, importez-en ou exportez-les pour les partager.</li>
+                           <li><strong>Choisissez un module</strong> dans la liste déroulante.</li>
+                           <li><strong>Remplissez le champ</strong> (ex: <code>un chat</code>) pour remplacer la variable <code>[IMAGE1]</code> dans le modèle de prompt.</li>
+                           <li><strong>Cliquez sur "Générer"</strong> pour voir le résultat !</li>
+                           <li><strong>Personnalisez :</strong> Créez vos propres modules avec le bouton ➕, importez-en ou exportez les vôtres pour les partager !</li>
                        </ol>
                     </HelpTooltip>
                 </h1>
-                <p className="mt-2 text-lg text-bunker-600 dark:text-bunker-400">Utilisez des modèles de prompts pour générer des images au style unique.</p>
+                <p className="mt-2 text-lg text-bunker-600 dark:text-bunker-400">Générez des images à partir de modèles de prompts personnalisables.</p>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                <div className="lg:col-span-2 bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg flex flex-col gap-6">
-                    <div>
-                        <label htmlFor="module-select" className="flex items-center gap-2 text-lg font-bold mb-2">
-                            <span>1. Choisissez un module</span>
-                            {remoteModuleStatus === 'success' && <span className="text-green-500 font-bold text-sm">OK</span>}
-                            {remoteModuleStatus === 'loading' && <span className="text-sm text-bunker-400 animate-pulse">Chargement...</span>}
-                            {remoteModuleStatus === 'error' && <span title="Le chargement des modules distants a échoué" className="text-red-500 font-bold text-sm">Erreur</span>}
-                        </label>
-                        <div className="flex items-stretch gap-2">
-                            <select id="module-select" value={selectedModuleId} onChange={(e) => setSelectedModuleId(e.target.value)} className="flex-grow w-full p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg focus:ring-2 focus:ring-sky-500">
-                                {modules.length === 0 && <option value="">Créez ou importez un module...</option>}
-                                {modules.map(m => <option key={m.id} value={m.id}>{m.isCustom ? '👤' : '⚙️'} {m.title}</option>)}
-                            </select>
-                            <button onClick={() => setIsAddModalOpen(true)} className="p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700" title="Ajouter"><PlusCircleIcon className="w-6 h-6"/></button>
-                        </div>
-                        <div className="flex items-center gap-2 mt-2">
-                             <button onClick={() => importModulesInputRef.current?.click()} className="flex-1 py-2 px-3 text-sm bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 flex items-center justify-center gap-2" title="Importer"><ArrowDownOnSquareIcon className="w-5 h-5"/> Importer</button>
-                             <button onClick={() => exportModules('v-texte-modules.json')} className="flex-1 py-2 px-3 text-sm bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 flex items-center justify-center gap-2" title="Exporter"><ArrowUpOnSquareIcon className="w-5 h-5"/> Exporter</button>
-                             <button onClick={handleDeleteClick} disabled={!activeModule?.isCustom} className="flex-1 py-2 px-3 text-sm bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 disabled:opacity-50 flex items-center justify-center gap-2" title="Supprimer"><TrashIcon className="w-5 h-5" /> Supprimer</button>
-                        </div>
-                    </div>
-
-                    {activeModule && (
-                        <>
-                            <div>
-                                <label htmlFor="module-input" className="block text-lg font-bold mb-2">2. Définissez votre sujet</label>
-                                <input id="module-input" type="text" value={moduleInput} onChange={(e) => setModuleInput(e.target.value)} placeholder={activeModule.placeholder} className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg focus:ring-2 focus:ring-sky-500"/>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-bold mb-2">3. Modèle de Prompt (modifiable)</h3>
-                                <textarea
-                                    value={editableTemplate}
-                                    onChange={(e) => setEditableTemplate(e.target.value)}
-                                    className="w-full h-24 p-3 text-sm bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors resize-y"
-                                    aria-label="Modèle de prompt modifiable"
-                                />
-                                <div className="mt-2">
-                                    <h4 className="font-semibold text-sm text-bunker-800 dark:text-bunker-200">Aperçu du Prompt Final</h4>
-                                    <p className="text-xs text-bunker-600 dark:text-bunker-400 p-2 bg-bunker-50 dark:bg-bunker-950 rounded-lg mt-1 min-h-[4rem] border border-bunker-200 dark:border-bunker-800">
-                                        {finalPrompt}
-                                    </p>
-                                </div>
-                            </div>
-                             <button onClick={handleGenerate} disabled={!moduleInput || !finalPrompt || isLoading} className="w-full py-3 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 disabled:cursor-not-allowed transition-transform duration-200 transform hover:scale-105 shadow-lg">
-                                {isLoading ? <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div> : <SparklesIcon className="w-6 h-6" />}
-                                <span>Générer</span>
-                            </button>
-                        </>
-                    )}
-                </div>
-                <div className="lg:col-span-3 bg-bunker-100 dark:bg-bunker-900 p-4 rounded-xl shadow-lg flex items-center justify-center min-h-[400px] lg:min-h-0">
-                    <div className="w-full aspect-square flex flex-col items-center justify-center border-2 border-dashed border-bunker-300 dark:border-bunker-700 rounded-lg p-4 relative">
-                        {isLoading && <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"><div className="w-10 h-10 border-4 border-t-transparent border-sky-500 rounded-full animate-spin"></div><p>Création en cours...</p></div>}
-                        {error && <div className="text-center text-red-500 p-4"><XCircleIcon className="w-12 h-12 mx-auto" /><p className="mt-2 font-semibold">Erreur: {error}</p></div>}
-                        {generatedImage && !isLoading && (
-                            <div
-                                className="relative group w-full h-full cursor-pointer"
-                                onClick={() => setIsPreviewOpen(true)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsPreviewOpen(true)}
-                                aria-label="Agrandir l'image"
-                            >
-                                <img src={generatedImage} alt={`Génération pour ${moduleInput}`} className="w-full h-full object-contain rounded-lg shadow-md" />
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg pointer-events-none">
-                                    <MagnifyingGlassIcon className="w-12 h-12 text-white" />
-                                </div>
-                            </div>
-                        )}
-                        {!isLoading && !error && !generatedImage && <p className="text-bunker-500 dark:text-bunker-400 p-4 text-center">Le résultat de votre création apparaîtra ici.</p>}
+            <div className="bg-bunker-100 dark:bg-bunker-900 p-6 rounded-xl shadow-lg max-w-4xl mx-auto">
+                <div className="mb-4">
+                    <label htmlFor="inspiration-module-select" className="block text-xl font-bold mb-2">
+                       Partie 1 : Générateur
+                    </label>
+                    <div className="flex items-stretch gap-2">
+                        <select
+                            id="inspiration-module-select"
+                            value={selectedModuleId}
+                            onChange={(e) => setSelectedModuleId(e.target.value)}
+                            className="flex-grow w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
+                        >
+                            {modules.map(module => (
+                                <option key={module.id} value={module.id}>
+                                    {module.isCustom ? '👤' : '⚙️'} {module.title}
+                                </option>
+                            ))}
+                        </select>
+                        <button onClick={() => importModulesInputRef.current?.click()} className="p-3 bg-bunker-200 dark:bg-bunker-800 text-bunker-700 dark:text-bunker-200 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors" title="Importer des modules depuis un fichier">
+                            <ArrowDownOnSquareIcon className="w-6 h-6"/>
+                        </button>
+                        <button onClick={() => exportModules('studio-creatif-ia-modules.json')} className="p-3 bg-bunker-200 dark:bg-bunker-800 text-bunker-700 dark:text-bunker-200 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors" title="Sauvegarder mes modules personnalisés dans un fichier">
+                            <ArrowUpOnSquareIcon className="w-6 h-6"/>
+                        </button>
+                        <button onClick={() => setIsAddModalOpen(true)} className="p-3 bg-bunker-200 dark:bg-bunker-800 text-bunker-700 dark:text-bunker-200 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors" title="Ajouter un nouveau module">
+                            <PlusCircleIcon className="w-6 h-6"/>
+                        </button>
+                        <button 
+                            onClick={handleDeleteSelectedModule}
+                            disabled={!activeModule?.isCustom}
+                            className="p-3 rounded-lg transition-colors bg-red-500/10 text-red-500 hover:bg-red-500/20 disabled:bg-bunker-200/50 dark:disabled:bg-bunker-800/50 disabled:text-bunker-400 dark:disabled:text-bunker-600 disabled:cursor-not-allowed"
+                            title={activeModule?.isCustom ? "Supprimer le module personnalisé" : "Impossible de supprimer un module par défaut"}
+                        >
+                            <TrashIcon className="w-6 h-6" />
+                        </button>
                     </div>
                 </div>
+                {activeModule && (
+                    <>
+                        <p className="mb-4 text-bunker-600 dark:text-bunker-400 text-sm italic">
+                            "{activeModule.template.split('[IMAGE1]').map((part, index) => 
+                                index === 0 ? part : <React.Fragment key={index}><strong className="text-bunker-800 dark:text-bunker-200 not-italic">[IMAGE1]</strong>{part}</React.Fragment>
+                            )}"
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                            <div className="flex flex-col gap-4 order-2 md:order-1">
+                                <label htmlFor="module-input" className="font-semibold">Remplacer <span className="font-bold text-sky-500">[IMAGE1]</span> par :</label>
+                                <div className="flex items-stretch gap-2">
+                                    <input
+                                        id="module-input"
+                                        type="text"
+                                        value={moduleInput}
+                                        onChange={(e) => setModuleInput(e.target.value)}
+                                        placeholder={activeModule.placeholder}
+                                        className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
+                                    />
+                                    <button
+                                        onClick={handleGenerateModuleImage}
+                                        disabled={!moduleInput || isModuleLoading || dailyUsage >= limit}
+                                        className="px-4 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 dark:disabled:bg-bunker-600 disabled:cursor-not-allowed transition-all"
+                                        title="Générer l'image"
+                                    >
+                                        {isModuleLoading ? (
+                                            <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                                        ) : (
+                                            <SparklesIcon className="w-5 h-5" />
+                                        )}
+                                    </button>
+                                </div>
+                                {moduleError && <p className="text-red-500 text-sm font-semibold mt-2">{moduleError}</p>}
+                            </div>
+                            <div className="w-full aspect-square bg-bunker-200 dark:bg-bunker-800 rounded-lg flex items-center justify-center border-2 border-dashed border-bunker-300 dark:border-bunker-700 relative overflow-hidden order-1 md:order-2">
+                                {isModuleLoading && (
+                                    <div className="absolute inset-0 bg-bunker-200/50 dark:bg-bunker-800/50 backdrop-blur-sm flex flex-col items-center justify-center gap-2 animate-pulse">
+                                        <div className="w-10 h-10 border-4 border-t-transparent border-sky-500 rounded-full animate-spin"></div>
+                                        <p className="font-semibold text-bunker-600 dark:text-bunker-300">Création en cours...</p>
+                                    </div>
+                                )}
+                                {!isModuleLoading && moduleError && (
+                                    <div className="text-center text-red-500 p-4">
+                                        <XCircleIcon className="w-12 h-12 mx-auto" />
+                                        <p className="mt-2 font-semibold">Erreur de génération</p>
+                                    </div>
+                                )}
+                                {!isModuleLoading && !moduleError && generatedImage && (
+                                    <div
+                                        className="relative group w-full h-full cursor-pointer"
+                                        onClick={() => setIsPreviewOpen(true)}
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsPreviewOpen(true)}
+                                        aria-label="Agrandir l'image"
+                                    >
+                                        <img src={generatedImage} alt={`Affiche de ${moduleInput}`} className="w-full h-full object-cover rounded-lg" />
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg pointer-events-none">
+                                            <MagnifyingGlassIcon className="w-12 h-12 text-white" />
+                                        </div>
+                                    </div>
+                                )}
+                                {!isModuleLoading && !moduleError && !generatedImage && (
+                                    <p className="text-bunker-500 dark:text-bunker-400 p-4 text-center">Le résultat de votre création apparaîtra ici.</p>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
+            
+            <VHistory 
+                history={history}
+                modules={modules}
+                onLoad={handleLoadFromHistory}
+                onDelete={deleteFromHistory}
+                onClear={clearHistory}
+                onExport={exportHistory}
+                onImportClick={() => historyImportRef.current?.click()}
+                isConfirmingClear={isConfirmingClear}
+                setIsConfirmingClear={setIsConfirmingClear}
+            />
 
-            {generatedImage && (
-                <ImagePreviewModal
-                    isOpen={isPreviewOpen}
-                    onClose={() => setIsPreviewOpen(false)}
-                    imageUrl={generatedImage}
-                    onSendToEditor={onSendToEditor}
-                />
-            )}
-
-            <ConfirmationModal
-                isOpen={!!moduleToDelete}
-                onClose={() => setModuleToDelete(null)}
-                onConfirm={handleConfirmDelete}
-                title="Confirmer la suppression"
-            >
-                <p>Voulez-vous vraiment supprimer le module suivant ?</p>
-                <p className="my-3 p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg text-center font-semibold text-sky-600 dark:text-sky-400">
-                    {moduleToDelete?.title}
-                </p>
-                <p>Cette action est irréversible.</p>
-            </ConfirmationModal>
+            {generatedImage && <ImagePreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} imageUrl={generatedImage} onSendToEditor={onSendToEditor} />}
 
             {isAddModalOpen && (
-                 <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setIsAddModalOpen(false)}>
-                    <div className="bg-bunker-100 dark:bg-bunker-900 rounded-xl p-6 w-full max-w-lg space-y-4" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="text-2xl font-bold">Ajouter un nouveau module</h3>
+                 <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)}>
+                    <div className="bg-bunker-100 dark:bg-bunker-900 rounded-xl shadow-2xl p-6 w-full max-w-lg space-y-4" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-2xl font-bold text-sky-600 dark:text-sky-500">Ajouter un nouveau module</h3>
                         <div>
-                            <label htmlFor="new-module-title" className="font-semibold mb-2 block">Titre</label>
-                            <input id="new-module-title" type="text" value={newModuleTitle} onChange={(e) => setNewModuleTitle(e.target.value)} placeholder="Ex: Style Aquarelle" className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg"/>
+                            <label htmlFor="new-module-title" className="font-semibold block mb-2">Titre du module</label>
+                            <input
+                                id="new-module-title"
+                                type="text"
+                                value={newModuleTitle}
+                                onChange={(e) => setNewModuleTitle(e.target.value)}
+                                placeholder="Ex: Style Aquarelle Rêveur"
+                                className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
+                            />
                         </div>
                         <div>
-                            <label htmlFor="new-module-template" className="font-semibold mb-2 block">Modèle (doit inclure <strong className="text-sky-500">[SUJET]</strong>)</label>
-                            <textarea id="new-module-template" value={newModuleTemplate} onChange={(e) => setNewModuleTemplate(e.target.value)} placeholder="Ex: Une aquarelle douce de [SUJET]..." className="w-full h-32 p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg" />
+                            <label htmlFor="new-module-template" className="font-semibold block mb-2">Modèle de prompt (doit inclure <span className="font-bold text-sky-500">[IMAGE1]</span>)</label>
+                            <textarea
+                                id="new-module-template"
+                                value={newModuleTemplate}
+                                onChange={(e) => setNewModuleTemplate(e.target.value)}
+                                placeholder="Ex: Une aquarelle douce et éthérée de [IMAGE1]..."
+                                className="w-full h-32 p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
+                            />
                         </div>
-                        {newModuleError && <p className="text-red-500 text-sm">{newModuleError}</p>}
-                        <div className="flex justify-end gap-4">
-                            <button onClick={() => setIsAddModalOpen(false)} className="py-2 px-4 bg-bunker-200 dark:bg-bunker-800 rounded-lg">Annuler</button>
-                            <button onClick={handleSaveNewModule} className="py-2 px-6 bg-sky-600 text-white font-bold rounded-lg">Enregistrer</button>
+                        {newModuleError && <p className="text-red-500 text-sm font-semibold">{newModuleError}</p>}
+                        <div className="flex justify-end gap-4 pt-4">
+                            <button onClick={() => setIsAddModalOpen(false)} className="py-2 px-4 bg-bunker-200 dark:bg-bunker-800 font-semibold rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors">Annuler</button>
+                            <button onClick={handleSaveNewModule} className="py-2 px-6 bg-sky-600 text-white font-bold rounded-lg hover:bg-sky-700 transition-colors">Enregistrer</button>
                         </div>
                     </div>
                  </div>

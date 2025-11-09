@@ -84,6 +84,12 @@ export const ArrowUturnLeftIcon: React.FC<{ className?: string }> = ({ className
     </svg>
 );
 
+export const ArchiveBoxIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+    </svg>
+);
+
 export const PencilIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -141,5 +147,48 @@ export const VideoCameraIcon: React.FC<{ className?: string }> = ({ className })
 export const PlayIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+    </svg>
+);
+
+export const Cog6ToothIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-1.003 1.11-1.226l.05-.022c.557-.223 1.16-.223 1.717 0l.05.022c.549.223 1.02.684 1.11 1.226l.048.282c.11.642.32 1.253.595 1.826l.047.1c.27.565.653 1.05 1.12 1.442l.048.04c.47.39.99.68 1.54.872l.048.016c.55.194 1.05.485 1.442.872l.04.048c.39.47.68.99.872 1.54l.016.048c.194.55.485 1.05.872 1.442l.048.04c.47.39.953.773 1.442 1.12l.1.047c.573.275 1.184.486 1.826.595l.282.048c.542.09.993.56 1.226 1.11l.022.05c.223.557.223 1.159 0 1.717l-.022.05c-.223.549-.684 1.02-1.226 1.11l-.282.048c-.642.11-1.253.32-1.826.595l-.1.047c-.565.27-1.05.653-1.442 1.12l-.048.04c-.39.47-.68.99-.872 1.54l-.016.048c-.194.55-.485 1.05-.872 1.442l-.048.04c-.47.39-.953.773-1.442-1.12l-.1-.047c-.573-.275-1.184-.486-1.826-.595l-.282-.048c-.542-.09-.993-.56-1.226-1.11l-.022-.05c-.223-.557-.223-1.159 0-1.717l.022-.05c.223-.549.684-1.02 1.226-1.11l.282-.048c.642-.11 1.253-.32 1.826.595l.1-.047c.565-.27 1.05-.653 1.442-1.12l.048-.04c.39-.47.68-.99.872-1.54l.016-.048c.194-.55.485 1.05.872-1.442l.048-.04c.47-.39.953-.773 1.442-1.12l.1-.047c.573-.275 1.184-.486 1.826-.595l.282-.048c.542-.09.993-.56 1.226-1.11l.022-.05c.223-.557.223-1.159 0-1.717l-.022-.05c-.223-.549-.684-1.02-1.226-1.11l-.282-.048c-.642-.11-1.253-.32-1.826-.595l-.1-.047c-.565-.27-1.05-.653-1.442-1.12l-.048-.04c-.39-.47-.68-.99-.872-1.54l-.016-.048c-.194-.55-.485-1.05-.872-1.442Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z" />
+    </svg>
+);
+
+export const ArrowUpCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 6-6m0 0 6 6m-6-6v12a6 6 0 0 1-12 0v-3" />
+    </svg>
+);
+
+export const ArrowDownCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m15 15-6 6m0 0-6-6m6 6V9a6 6 0 0 1 12 0v3" />
+    </svg>
+);
+
+export const ArrowLeftCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m15 15-6-6m0 0 6-6m-6 6h12a6 6 0 0 1 0 12h-3" />
+    </svg>
+);
+
+export const ArrowRightCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m9 9 6 6m0 0 6-6m-6 6V9a6 6 0 0 1 12 0v3" />
+    </svg>
+);
+
+export const ArrowPathIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 11.667 0l3.181-3.183m-3.181-4.991v4.99" />
+    </svg>
+);
+
+export const BeakerIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c.394-.166.82-.265 1.25-.334a21.922 21.922 0 0 1 1.737-.126m-2.987 0a21.922 21.922 0 0 0-1.737.126M14.25 3.104v5.714a2.25 2.25 0 0 0 .659 1.591L19 14.5M14.25 3.104c-.394-.166-.82-.265-1.25-.334a21.922 21.922 0 0 0-1.737-.126m2.987 0a21.922 21.922 0 0 1 1.737.126M5 14.5h14M5 14.5a2.25 2.25 0 0 1-2.25-2.25v-1.5a2.25 2.25 0 0 1 2.25-2.25h14a2.25 2.25 0 0 1 2.25 2.25v1.5a2.25 2.25 0 0 1-2.25 2.25M5 14.5v3.75a2.25 2.25 0 0 0 2.25 2.25h9.5a2.25 2.25 0 0 0 2.25-2.25V14.5" />
     </svg>
 );

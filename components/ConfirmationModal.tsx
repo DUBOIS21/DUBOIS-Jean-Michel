@@ -7,9 +7,10 @@ interface ConfirmationModalProps {
   onConfirm: () => void;
   title: string;
   children: React.ReactNode;
+  confirmText?: string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, children }) => {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, children, confirmText }) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -63,14 +64,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
                 onClick={onClose} 
                 className="w-full sm:w-auto py-2 px-4 bg-bunker-200 dark:bg-bunker-800 font-semibold rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors"
             >
-                Non, Annuler
+                Annuler
             </button>
             <button 
                 type="button"
                 onClick={onConfirm} 
                 className="w-full sm:w-auto py-2 px-6 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
             >
-                Oui, Supprimer
+                {confirmText || 'Oui, Confirmer'}
             </button>
         </div>
       </div>

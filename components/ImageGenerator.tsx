@@ -1,11 +1,12 @@
 
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { generateImage } from '../services/geminiService';
 import { AspectRatio, HistoryEntry } from '../types';
-import { SparklesIcon, TrashIcon, DiceIcon, ArrowRightIcon, DownloadIcon, ArrowUpOnSquareIcon, ArrowDownOnSquareIcon, MagnifyingGlassIcon, XMarkIcon, ChevronDownIcon, PhotoIcon } from './Icons';
+import { SparklesIcon, TrashIcon, DiceIcon, ArrowRightIcon, DownloadIcon, ArrowUpOnSquareIcon, ArrowDownOnSquareIcon, MagnifyingGlassIcon, XMarkIcon, ChevronDownIcon, PhotoIcon, ArrowPathIcon } from './Icons';
 import HelpTooltip from './HelpTooltip';
 import ImagePreviewModal from './ImagePreviewModal';
+import ConfirmationModal from './ConfirmationModal';
+import { resizeImage, saveHistorySafely } from '../hooks/useVHistory';
 
 
 const DEFAULT_NEGATIVE_PROMPT = '';
@@ -111,25 +112,6 @@ interface ImageGeneratorProps {
     onUsageUpdate: (count: number) => void;
 }
 
-const saveHistorySafely = (historyToSave: HistoryEntry[]): HistoryEntry[] | null => {
-    try {
-        localStorage.setItem('generationHistory', JSON.stringify(historyToSave));
-        return historyToSave;
-    } catch (e: any) {
-        if ((e.name === 'QuotaExceededError' || String(e).toLowerCase().includes('quota')) && historyToSave.length > 0) {
-            console.warn(`Le quota de stockage local est dépassé. L'historique sera automatiquement réduit pour libérer de l'espace. Taille actuelle: ${historyToSave.length - 1} éléments.`);
-            const pruned = historyToSave.slice(0, historyToSave.length - 1);
-            if (pruned.length === 0 && historyToSave.length > 0) {
-                 try { localStorage.removeItem('generationHistory'); } catch (removeError) {}
-                 return [];
-            }
-            return saveHistorySafely(pruned);
-        }
-        console.error("Impossible de sauvegarder l'historique:", e);
-        return null;
-    }
-};
-
 const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUsage, limit, onUsageUpdate }) => {
     const [prompt, setPrompt] = useState<string>('');
     const [negativePrompt, setNegativePrompt] = useState<string>(DEFAULT_NEGATIVE_PROMPT);
@@ -144,13 +126,29 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
     const [history, setHistory] = useState<HistoryEntry[]>([]);
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const [activeImageUrlForModal, setActiveImageUrlForModal] = useState<string | null>(null);
+    const [isConfirmingClear, setIsConfirmingClear] = useState(false);
+    const [isConfirmingDeleteSelected, setIsConfirmingDeleteSelected] = useState(false);
+    const [selectedHistoryIds, setSelectedHistoryIds] = useState<Set<string>>(new Set());
     const [inputImages, setInputImages] = useState<File[]>([]);
     const [inputImageUrls, setInputImageUrls] = useState<string[]>([]);
     const [numberOfImages, setNumberOfImages] = useState<number>(1);
     const importInputRef = useRef<HTMLInputElement>(null);
     const uploadInputRef = useRef<HTMLInputElement>(null);
+    const [examplesHistory, setExamplesHistory] = useState<HistoryEntry[]>([]);
+    const [selectedExampleId, setSelectedExampleId] = useState<string>('');
 
     const MAX_INSPIRATION_IMAGES = 3;
+
+    const updateExamplesHistory = useCallback(() => {
+        try {
+            const savedHistory = localStorage.getItem('examplesHistory');
+            if (savedHistory) {
+                setExamplesHistory(JSON.parse(savedHistory));
+            }
+        } catch (e) {
+            console.error("Impossible de charger l'historique des exemples:", e);
+        }
+    }, []);
 
     useEffect(() => {
         try {
@@ -166,7 +164,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         } catch (e) {
             console.error("Impossible de charger l'historique ou les paramètres:", e);
         }
-    }, []);
+        updateExamplesHistory();
+    }, [updateExamplesHistory]);
     
     useEffect(() => {
         try {
@@ -176,30 +175,34 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         }
     }, [seed]);
 
-    const addToHistory = (entry: Omit<HistoryEntry, 'id' | 'timestamp'>, imageUrls: string[]) => {
+    const addToHistory = useCallback(async (entry: Omit<HistoryEntry, 'id' | 'timestamp'>, imageUrls: string[]) => {
+        const resizedImageUrls = await Promise.all(imageUrls.map(url => resizeImage(url)));
+        const resizedInputImageUrls = entry.inputImageUrls ? await Promise.all(entry.inputImageUrls.map(url => resizeImage(url))) : [];
+
         setHistory(prevHistory => {
             const newEntry: HistoryEntry = {
                 ...entry,
                 id: crypto.randomUUID(),
                 timestamp: Date.now(),
-                imageUrls: imageUrls,
+                imageUrls: resizedImageUrls,
+                inputImageUrls: resizedInputImageUrls,
             };
             const updatedHistory = [newEntry, ...prevHistory].slice(0, 20);
             
-            const finalHistory = saveHistorySafely(updatedHistory);
+            const finalHistory = saveHistorySafely<HistoryEntry>('generationHistory', updatedHistory);
             
             if (finalHistory !== null) {
                 return finalHistory;
             }
-            setError("Impossible de sauvegarder dans l'historique, le stockage local est plein.");
+            setError("Une erreur est survenue lors de la sauvegarde de l'historique. Le stockage local est peut-être plein.");
             return prevHistory;
         });
-    };
+    }, []);
     
     const deleteFromHistory = useCallback((idToDelete: string) => {
         setHistory(prevHistory => {
             const updatedHistory = prevHistory.filter(entry => entry.id !== idToDelete);
-            const finalHistory = saveHistorySafely(updatedHistory);
+            const finalHistory = saveHistorySafely<HistoryEntry>('generationHistory', updatedHistory);
 
             if (finalHistory !== null) {
                 return finalHistory;
@@ -261,7 +264,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         } finally {
             setIsLoading(false);
         }
-    }, [prompt, negativePrompt, aspectRatio, customWidth, customHeight, isLoading, modelStyle, seed, inputImageUrls, numberOfImages, dailyUsage, limit, onUsageUpdate]);
+    }, [prompt, negativePrompt, aspectRatio, customWidth, customHeight, isLoading, modelStyle, seed, inputImageUrls, numberOfImages, dailyUsage, limit, onUsageUpdate, addToHistory]);
     
     const handleReset = useCallback(() => {
         setPrompt('');
@@ -276,6 +279,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         setInputImages([]);
         setInputImageUrls([]);
         setNumberOfImages(1);
+        setSelectedExampleId('');
         if (uploadInputRef.current) {
             uploadInputRef.current.value = '';
         }
@@ -299,13 +303,16 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
     };
     
     const clearHistory = useCallback(() => {
-        setHistory([]);
-        try {
-            localStorage.removeItem('generationHistory');
-        } catch (e) {
-            console.error("Impossible de vider l'historique:", e);
+        const clearedHistory = saveHistorySafely<HistoryEntry>('generationHistory', []);
+        if (clearedHistory !== null) {
+            setHistory(clearedHistory);
         }
+        setIsConfirmingClear(false);
     }, []);
+
+    const handleConfirmClear = useCallback(() => {
+        clearHistory();
+    }, [clearHistory]);
 
     const handleRandomPrompt = useCallback(() => {
         const prompts = Object.values(preFilledPrompts);
@@ -350,9 +357,8 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                 const content = event.target?.result as string;
                 const importedHistory = JSON.parse(content);
 
-                // FIX: Added robust validation to prevent crash on invalid history file (e.g., with null items).
                 if (Array.isArray(importedHistory) && importedHistory.every(item => item && typeof item === 'object' && 'id' in item && 'prompt' in item && 'timestamp' in item)) {
-                    const finalHistory = saveHistorySafely(importedHistory);
+                    const finalHistory = saveHistorySafely<HistoryEntry>('generationHistory', importedHistory);
                     if (finalHistory !== null) {
                         setHistory(finalHistory);
                     } else {
@@ -368,7 +374,6 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         };
         reader.readAsText(file);
 
-        // Reset input value to allow re-importing the same file
         e.target.value = '';
     };
 
@@ -385,14 +390,13 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
             }
     
             setInputImages(prev => [...prev, ...newFiles]);
-            setNumberOfImages(1); // Force 1 image when using an input image
+            setNumberOfImages(1); 
     
             newFiles.forEach(file => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
                     setInputImageUrls(prev => [...prev, reader.result as string]);
                 };
-                // FIX: Explicitly cast file to Blob to prevent type error where it's inferred as 'unknown'.
                 reader.readAsDataURL(file as Blob);
             });
             if(e.target) e.target.value = '';
@@ -419,7 +423,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
     };
     
     const handleCustomDimChange = (e: React.ChangeEvent<HTMLInputElement>, dimension: 'width' | 'height') => {
-        const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+        const value = e.target.value.replace(/[^0-9]/g, ''); 
         if (dimension === 'width') {
             setCustomWidth(value);
         } else {
@@ -427,6 +431,49 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
         }
         if (aspectRatio !== null) {
             setAspectRatio(null);
+        }
+    };
+
+    const handleHistorySelectionChange = (id: string) => {
+        setSelectedHistoryIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    };
+    
+    const handleSelectAllHistory = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelectedHistoryIds(new Set(history.map(entry => entry.id)));
+        } else {
+            setSelectedHistoryIds(new Set());
+        }
+    };
+
+    const deleteSelectedFromHistory = useCallback(() => {
+        setHistory(prevHistory => {
+            const updatedHistory = prevHistory.filter(entry => !selectedHistoryIds.has(entry.id));
+            const finalHistory = saveHistorySafely<HistoryEntry>('generationHistory', updatedHistory);
+            setSelectedHistoryIds(new Set());
+            if (finalHistory !== null) {
+                return finalHistory;
+            }
+            return prevHistory;
+        });
+        setIsConfirmingDeleteSelected(false);
+    }, [selectedHistoryIds]);
+
+    const handleExampleSelect = (id: string) => {
+        setSelectedExampleId(id);
+        if (!id) return;
+        
+        const entry = examplesHistory.find(e => e.id === id);
+        if (entry) {
+            loadFromHistory(entry);
         }
     };
 
@@ -532,8 +579,44 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                         </div>
                     </div>
 
+                    {/* Style 2 */}
+                    <div className="mt-4 space-y-2">
+                        <div className="flex items-center gap-2">
+                           <label htmlFor="example-style-select" className="font-semibold">Style 2 (Archive Exemples)</label>
+                           <HelpTooltip title="Utiliser un style archivé">
+                                <p>Cette liste contient les créations que vous avez générées et archivées depuis l'onglet "Exemples".</p>
+                                <ol>
+                                    <li>Sélectionnez un prompt dans la liste pour charger instantanément ses paramètres (prompt, images d'influence, format).</li>
+                                    <li>Cliquez sur le bouton 🔄 pour rafraîchir la liste si vous avez récemment archivé de nouveaux éléments.</li>
+                                </ol>
+                            </HelpTooltip>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <select
+                                id="example-style-select"
+                                value={selectedExampleId}
+                                onChange={(e) => handleExampleSelect(e.target.value)}
+                                className="w-full p-3 bg-bunker-200 dark:bg-bunker-800 border border-bunker-300 dark:border-bunker-700 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none transition-colors"
+                            >
+                                <option value="">Choisir un style archivé...</option>
+                                {examplesHistory.map(entry => (
+                                    <option key={entry.id} value={entry.id} title={entry.prompt}>
+                                        {entry.prompt.substring(0, 50)}{entry.prompt.length > 50 ? '...' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={updateExamplesHistory}
+                                title="Mettre à jour la liste"
+                                className="p-3 bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors"
+                            >
+                                <ArrowPathIcon className="w-5 h-5 text-bunker-600 dark:text-bunker-300" />
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Options Avancées */}
-                     <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group">
+                     <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group" open>
                         <summary className="list-none flex justify-between items-center cursor-pointer">
                             <h3 className="text-lg font-semibold">Options Avancées</h3>
                             <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
@@ -641,7 +724,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                     </details>
                     
                     {/* Paramètres Avancés */}
-                    <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group">
+                    <details className="mt-6 pt-6 border-t border-bunker-300 dark:border-bunker-700 group" open>
                         <summary className="list-none flex justify-between items-center cursor-pointer">
                             <h3 className="text-lg font-semibold">Paramètres Avancés</h3>
                             <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
@@ -701,10 +784,10 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                     </div>
                 </div>
 
-                 {/* Historique */}
+                 {/* Historique / Archive */}
                 <details className="bg-bunker-100 dark:bg-bunker-900 p-4 sm:p-6 rounded-xl shadow-lg group" open={history.length > 0}>
                     <summary className="list-none flex justify-between items-center cursor-pointer mb-4">
-                         <h3 className="text-xl font-bold">Historique</h3>
+                         <h3 className="text-xl font-bold">Historique / Archive</h3>
                          <div className="flex items-center">
                             <div className="flex items-center gap-1 mr-2">
                                 <button
@@ -724,7 +807,7 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                                     <ArrowUpOnSquareIcon className="w-5 h-5" />
                                 </button>
                                 <button 
-                                    onClick={(e) => { e.stopPropagation(); clearHistory(); }}
+                                    onClick={(e) => { e.stopPropagation(); setIsConfirmingClear(true); }}
                                     aria-label="Vider tout l'historique" 
                                     title="Vider tout l'historique"
                                     className="p-1.5 rounded-full text-bunker-500 hover:text-red-500 dark:text-bunker-400 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors duration-200"
@@ -735,34 +818,78 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                             <ChevronDownIcon className="w-5 h-5 text-bunker-500 group-open:rotate-180 transition-transform duration-300" />
                         </div>
                     </summary>
+
+                    {history.length > 0 && (
+                        <div className="mb-2 p-2 bg-bunker-200 dark:bg-bunker-800 rounded-lg flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAllHistory}
+                                    checked={history.length > 0 && selectedHistoryIds.size === history.length}
+                                    aria-label="Tout sélectionner"
+                                    className="h-5 w-5 rounded text-sky-600 bg-bunker-300 dark:bg-bunker-700 border-bunker-400 dark:border-bunker-600 focus:ring-sky-500"
+                                />
+                                <label className="text-sm font-semibold select-none">
+                                    {selectedHistoryIds.size > 0 ? `${selectedHistoryIds.size} sélectionné(s)` : "Tout sélectionner"}
+                                </label>
+                            </div>
+                            {selectedHistoryIds.size > 0 && (
+                                <button
+                                    onClick={() => setIsConfirmingDeleteSelected(true)}
+                                    className="flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-600 p-1 rounded-md hover:bg-red-500/10 transition-colors"
+                                >
+                                    <TrashIcon className="w-4 h-4" />
+                                    <span>Supprimer</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     <div className="max-h-80 overflow-y-auto space-y-2 pr-2">
                         {history.length === 0 ? (
                             <p className="text-sm text-center text-bunker-500 dark:text-bunker-400 py-4">Votre historique est vide.</p>
                         ) : history.map(entry => (
-                            <div key={entry.id} className="p-2 bg-bunker-200 dark:bg-bunker-800 rounded-lg hover:bg-bunker-300 dark:hover:bg-bunker-700 transition-colors flex items-center justify-between gap-3">
-                                <div onClick={() => loadFromHistory(entry)} className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                                    {entry.imageUrls && entry.imageUrls[0] && <img src={entry.imageUrls[0]} alt="aperçu" className="w-10 h-10 object-cover rounded-md flex-shrink-0" />}
-                                    <p className="text-sm truncate">{entry.prompt}</p>
+                            <div 
+                                key={entry.id} 
+                                className={`p-2 rounded-lg transition-colors flex items-center justify-between gap-3 cursor-pointer ${selectedHistoryIds.has(entry.id) ? 'bg-sky-500/20 ring-2 ring-sky-500' : 'bg-bunker-200 dark:bg-bunker-800 hover:bg-bunker-300 dark:hover:bg-bunker-700'}`}
+                                onClick={() => handleHistorySelectionChange(entry.id)}
+                            >
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <input
+                                        type="checkbox"
+                                        readOnly
+                                        checked={selectedHistoryIds.has(entry.id)}
+                                        aria-hidden="true"
+                                        className="h-5 w-5 rounded text-sky-600 bg-bunker-300 dark:bg-bunker-700 border-bunker-400 dark:border-bunker-600 focus:ring-sky-500 flex-shrink-0 pointer-events-none"
+                                    />
+                                    {entry.imageUrls && entry.imageUrls[0] && 
+                                        <img src={entry.imageUrls[0]} alt="aperçu" className="w-10 h-10 object-cover rounded-md flex-shrink-0" />
+                                    }
+                                    <div className="truncate" onClick={(e) => { e.stopPropagation(); loadFromHistory(entry); }} title="Recharger ces paramètres">
+                                        <p className="text-sm truncate" title={entry.prompt}>{entry.prompt}</p>
+                                        <p className="text-xs text-bunker-500 dark:text-bunker-400">
+                                            {new Date(entry.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1 flex-shrink-0">
+                                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                                     <a 
                                         href={entry.imageUrls?.[0]} 
                                         download={`creation-ia-${entry.id.substring(0, 8)}.jpg`}
-                                        onClick={(e) => e.stopPropagation()}
                                         title="Télécharger la première image"
                                         className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
                                     >
                                         <DownloadIcon className="w-5 h-5" />
                                     </a>
                                     <button 
-                                        onClick={(e) => { e.stopPropagation(); onSendToEditor(entry.imageUrls![0]); }}
+                                        onClick={() => onSendToEditor(entry.imageUrls![0])}
                                         title="Envoyer la première image vers l'éditeur"
                                         className="p-2 rounded-full text-bunker-600 hover:text-sky-600 dark:text-bunker-300 dark:hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
                                     >
                                         <ArrowRightIcon className="w-5 h-5" />
                                     </button>
                                     <button 
-                                        onClick={(e) => { e.stopPropagation(); deleteFromHistory(entry.id); }}
+                                        onClick={() => deleteFromHistory(entry.id)}
                                         title="Supprimer de l'historique"
                                         className="p-2 rounded-full text-bunker-600 hover:text-red-500 dark:text-bunker-300 dark:hover:text-red-400 hover:bg-red-500/10 transition-colors"
                                     >
@@ -825,6 +952,24 @@ const ImageGenerator: React.FC<ImageGeneratorProps> = ({ onSendToEditor, dailyUs
                     onSendToEditor={onSendToEditor}
                 />
             )}
+            <ConfirmationModal
+                isOpen={isConfirmingClear}
+                onClose={() => setIsConfirmingClear(false)}
+                onConfirm={handleConfirmClear}
+                title="Vider tout l'historique"
+                confirmText="Oui, Vider"
+            >
+                <p>Êtes-vous sûr de vouloir vider tout l'historique ? Cette action est irréversible.</p>
+            </ConfirmationModal>
+            <ConfirmationModal
+                isOpen={isConfirmingDeleteSelected}
+                onClose={() => setIsConfirmingDeleteSelected(false)}
+                onConfirm={deleteSelectedFromHistory}
+                title={`Supprimer ${selectedHistoryIds.size} élément(s)`}
+                confirmText="Oui, Supprimer"
+            >
+                <p>Êtes-vous sûr de vouloir supprimer les ${selectedHistoryIds.size} éléments sélectionnés de l'historique ? Cette action est irréversible.</p>
+            </ConfirmationModal>
         </div>
     );
 };

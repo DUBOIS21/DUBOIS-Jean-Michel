@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 
 interface MaskableImageProps {
@@ -20,16 +19,28 @@ const MaskableImage = forwardRef<{ getImageWithMask: () => string | null }, Mask
         // Clear canvas when src changes
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        image.onload = () => {
-          // Match canvas dimensions to the image's container-fitted size
+        const resizeCanvas = () => {
+          // La taille CSS du canevas correspond maintenant à la taille affichée de l'image grâce à la disposition en grille.
+          // Il suffit de définir la résolution interne du canevas pour qu'elle corresponde.
           const { width, height } = image.getBoundingClientRect();
           canvas.width = width;
           canvas.height = height;
         };
-        // If image is already loaded, trigger onload manually
+        
+        image.onload = resizeCanvas;
+        
+        // Utiliser un ResizeObserver pour gérer le redimensionnement de la fenêtre et s'assurer que le canevas reste synchronisé
+        const resizeObserver = new ResizeObserver(resizeCanvas);
+        resizeObserver.observe(image);
+        
+        // Si l'image est déjà chargée, déclencher le redimensionnement manuellement
         if (image.complete) {
-            image.onload(new Event('load'));
+            resizeCanvas();
         }
+
+        return () => {
+            resizeObserver.unobserve(image);
+        };
       }
     }
   }, [src]);
@@ -62,7 +73,7 @@ const MaskableImage = forwardRef<{ getImageWithMask: () => string | null }, Mask
     if (context) {
       context.lineWidth = brushSize;
       context.lineCap = 'round';
-      context.strokeStyle = 'rgba(255, 0, 150, 0.6)'; // Bright pink with some transparency
+      context.strokeStyle = 'rgba(255, 0, 150, 0.6)'; // Rose vif avec un peu de transparence
       context.lineTo(x, y);
       context.stroke();
       context.beginPath();
@@ -77,17 +88,17 @@ const MaskableImage = forwardRef<{ getImageWithMask: () => string | null }, Mask
       if (!image || !maskCanvas) return null;
 
       const tempCanvas = document.createElement('canvas');
-      // Use naturalWidth/Height for full resolution
+      // Utiliser naturalWidth/Height pour la pleine résolution
       tempCanvas.width = image.naturalWidth;
       tempCanvas.height = image.naturalHeight;
       const ctx = tempCanvas.getContext('2d');
       
       if (!ctx) return null;
       
-      // Draw original image at full resolution
+      // Dessiner l'image originale en pleine résolution
       ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
       
-      // Draw mask canvas, scaling it to match the original image resolution
+      // Dessiner le canevas du masque, en le redimensionnant pour correspondre à la résolution de l'image originale
       ctx.drawImage(maskCanvas, 0, 0, image.naturalWidth, image.naturalHeight);
       
       return tempCanvas.toDataURL('image/png');
@@ -95,12 +106,12 @@ const MaskableImage = forwardRef<{ getImageWithMask: () => string | null }, Mask
   }));
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="w-full h-full grid place-items-center">
       <img
         ref={imageRef}
         src={src}
         alt="Original pour édition"
-        className="max-w-full max-h-full object-contain pointer-events-none rounded-lg"
+        className="[grid-area:1/1] max-w-full max-h-full object-contain pointer-events-none rounded-lg"
         crossOrigin="anonymous" 
       />
       <canvas
@@ -109,11 +120,10 @@ const MaskableImage = forwardRef<{ getImageWithMask: () => string | null }, Mask
         onMouseUp={stopDrawing}
         onMouseOut={stopDrawing}
         onMouseMove={draw}
-        className="absolute top-0 left-0 w-full h-full cursor-crosshair"
+        className="[grid-area:1/1] cursor-crosshair"
       />
     </div>
   );
 });
 
 export default MaskableImage;
-   

@@ -2,10 +2,8 @@ export enum Tab {
   GENERATOR = 'generator',
   EDITOR = 'editor',
   PROMPT_BUILDER = 'prompt-builder',
-  V_STYLES = 'v-styles',
-  V_TEXTE = 'v-texte',
-  V_IMAGE = 'v-image',
   VIDEO = 'video',
+  EXAMPLES = 'examples',
 }
 
 export type AspectRatio = "1:1" | "3:4" | "4:3" | "9:16" | "16:9";
@@ -24,4 +22,14 @@ export interface HistoryEntry extends GenerationSettings {
   id: string;
   timestamp: number;
   imageUrls?: string[];
+}
+// FIX: Add the VHistoryEntry type definition to resolve import errors.
+export interface VHistoryEntry {
+  id: string;
+  timestamp: number;
+  moduleId: string;
+  userInput: string;
+  finalPrompt: string;
+  generatedImageUrl: string;
+  baseImageUrl?: string;
 }

@@ -46,9 +46,13 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
     const passwordRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        const urlsToClean = [previewVideoUrl, generatedVideoUrl];
         return () => {
-            if (previewVideoUrl) URL.revokeObjectURL(previewVideoUrl);
-            if (generatedVideoUrl) URL.revokeObjectURL(generatedVideoUrl);
+            urlsToClean.forEach(url => {
+                if (url && url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+            });
             if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
         };
     }, [previewVideoUrl, generatedVideoUrl]);
@@ -77,14 +81,12 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
     
     const handleReset = useCallback(() => {
         setStep('prompt');
-        if (previewVideoUrl) URL.revokeObjectURL(previewVideoUrl);
-        if (generatedVideoUrl) URL.revokeObjectURL(generatedVideoUrl);
         setPreviewVideoUrl(null);
         setGeneratedVideoUrl(null);
         setError(null);
         setIsLoading(false);
         setLoadingStep(null);
-    }, [previewVideoUrl, generatedVideoUrl]);
+    }, []);
 
     const handlePromptInteraction = () => {
         if (!isUnlocked) {
@@ -111,7 +113,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
         setIsLoading(true);
         setLoadingStep('preview');
         setError(null);
-        if (previewVideoUrl) URL.revokeObjectURL(previewVideoUrl);
         setPreviewVideoUrl(null);
         
         try {
@@ -126,7 +127,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
             setIsLoading(false);
             setLoadingStep(null);
         }
-    }, [prompt, aspectRatio, isLoading, onUsageUpdate, previewVideoUrl, isUnlocked]);
+    }, [prompt, aspectRatio, isLoading, onUsageUpdate, isUnlocked]);
 
     const handleGenerateFull = useCallback(async () => {
         if (!prompt || isLoading || !isUnlocked) return;
@@ -134,7 +135,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
         setIsLoading(true);
         setLoadingStep('full');
         setError(null);
-        if (generatedVideoUrl) URL.revokeObjectURL(generatedVideoUrl);
         setGeneratedVideoUrl(null);
         
         try {
@@ -149,7 +149,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onUsageUpdate }) => {
             setIsLoading(false);
             setLoadingStep(null);
         }
-    }, [prompt, model, aspectRatio, resolution, isLoading, onUsageUpdate, generatedVideoUrl, isUnlocked]);
+    }, [prompt, model, aspectRatio, resolution, isLoading, onUsageUpdate, isUnlocked]);
 
     const renderOptionGroup = (title: string, options: string[], selectedValue: string, setter: (value: any) => void) => (
         <div>

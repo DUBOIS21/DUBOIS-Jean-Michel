@@ -4,6 +4,9 @@ import { SparklesIcon, DownloadIcon, XCircleIcon, PlusCircleIcon, TrashIcon, Arr
 import HelpTooltip from './HelpTooltip';
 import ImagePreviewModal from './ImagePreviewModal';
 import ConfirmationModal from './ConfirmationModal';
+import { useVHistory } from '../hooks/useVHistory';
+import VHistory from './VHistory';
+import { VHistoryEntry } from '../types';
 
 const defaultStyles = [
     {
@@ -100,11 +103,15 @@ const useGenericItems = (storageKey: string, defaultItems: any[]) => {
 interface VStylesProps {
     onUsageUpdate: (count: number) => void;
     onSendToEditor: (imageUrl: string) => void;
+    onLoadComplete: (status: 'success' | 'error') => void;
+    dailyUsage: number;
+    limit: number;
 }
 
-const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
+const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor, onLoadComplete, dailyUsage, limit }) => {
     const importStylesInputRef = useRef<HTMLInputElement>(null);
     const { items: styles, addItem: addStyle, deleteItem: deleteStyle, importItems: importStyles, exportItems: exportStyles } = useGenericItems('customImageStyles', defaultStyles);
+    const { history, addToHistory, deleteFromHistory, clearHistory, exportHistory, importInputRef: historyImportRef, handleImportFile, isConfirmingClear, setIsConfirmingClear } = useVHistory('vStylesHistory');
 
     const [selectedStyleId, setSelectedStyleId] = useState(DEFAULT_STYLE_ID);
     const [styleInput, setStyleInput] = useState('');
@@ -120,6 +127,14 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
     const [newStyleError, setNewStyleError] = useState('');
 
     const [styleToDelete, setStyleToDelete] = useState<any | null>(null);
+
+    useEffect(() => {
+        try {
+            onLoadComplete('success');
+        } catch(e) {
+            onLoadComplete('error');
+        }
+    }, [onLoadComplete]);
 
     useEffect(() => {
         if (!styles.some(m => m.id === selectedStyleId)) {
@@ -140,22 +155,29 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
     }, [editableTemplate, styleInput, activeStyle]);
 
     const handleGenerate = useCallback(async () => {
-        if (!finalPrompt || !styleInput) return;
+        if (!finalPrompt || !styleInput || !activeStyle) return;
         setIsLoading(true);
         setError(null);
         setGeneratedImage(null);
         try {
             const imageUrls = await generateImage(finalPrompt, '', '1:1', 1);
             if (imageUrls.length > 0) {
-                setGeneratedImage(imageUrls[0]);
+                const generatedImageUrl = imageUrls[0];
+                setGeneratedImage(generatedImageUrl);
                 onUsageUpdate(1);
+                addToHistory({
+                    moduleId: activeStyle.id,
+                    userInput: styleInput,
+                    finalPrompt,
+                    generatedImageUrl,
+                });
             } else throw new Error("L'API n'a retourné aucune image.");
         } catch (e: any) {
             setError(e.message || "Une erreur est survenue.");
         } finally {
             setIsLoading(false);
         }
-    }, [finalPrompt, styleInput, onUsageUpdate]);
+    }, [finalPrompt, styleInput, onUsageUpdate, activeStyle, addToHistory]);
 
     const handleSaveNewStyle = () => {
         if (!newStyleTitle.trim()) { setNewStyleError('Le titre est requis.'); return; }
@@ -179,7 +201,7 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
         }
     };
     
-    const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImportStylesFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -187,6 +209,13 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
             reader.readAsText(file);
             e.target.value = '';
         }
+    };
+
+    const handleLoadFromHistory = (entry: VHistoryEntry) => {
+        setSelectedStyleId(entry.moduleId);
+        setStyleInput(entry.userInput);
+        setGeneratedImage(entry.generatedImageUrl);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     useEffect(() => {
@@ -197,11 +226,13 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
 
     return (
         <div className="space-y-8">
-            <input type="file" ref={importStylesInputRef} onChange={handleImportFile} className="hidden" accept=".json" />
+            <input type="file" ref={importStylesInputRef} onChange={handleImportStylesFile} className="hidden" accept=".json" />
+            <input type="file" ref={historyImportRef} onChange={handleImportFile} className="hidden" accept=".json" />
+
             <div className="text-center">
                 <h1 className="text-3xl sm:text-4xl font-bold text-sky-600 dark:text-sky-500 inline-flex items-center gap-2">
-                    <span>V-STYLES · Gestionnaire de Styles</span>
-                     <HelpTooltip title="Comment utiliser V-STYLES ?">
+                    <span>Gestionnaire de Styles</span>
+                     <HelpTooltip title="Comment utiliser le Gestionnaire de Styles ?">
                        <p>Les styles sont des modèles de prompts qui vous permettent de créer des images avec une esthétique spécifique et réutilisable.</p>
                        <ol>
                            <li><strong>Choisissez un style</strong> dans la liste. Son modèle de prompt s'affichera.</li>
@@ -254,7 +285,7 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
                                     </p>
                                 </div>
                             </div>
-                             <button onClick={handleGenerate} disabled={!styleInput || !finalPrompt || isLoading} className="w-full py-3 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 disabled:cursor-not-allowed transition-transform duration-200 transform hover:scale-105 shadow-lg">
+                             <button onClick={handleGenerate} disabled={!styleInput || !finalPrompt || isLoading || dailyUsage >= limit} className="w-full py-3 bg-sky-600 text-white font-bold rounded-lg flex items-center justify-center gap-2 hover:bg-sky-700 disabled:bg-bunker-400 disabled:cursor-not-allowed transition-transform duration-200 transform hover:scale-105 shadow-lg">
                                 {isLoading ? <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div> : <SparklesIcon className="w-6 h-6" />}
                                 <span>Générer</span>
                             </button>
@@ -283,6 +314,18 @@ const VStyles: React.FC<VStylesProps> = ({ onUsageUpdate, onSendToEditor }) => {
                     </div>
                 </div>
             </div>
+
+            <VHistory 
+                history={history}
+                modules={styles}
+                onLoad={handleLoadFromHistory}
+                onDelete={deleteFromHistory}
+                onClear={clearHistory}
+                onExport={exportHistory}
+                onImportClick={() => historyImportRef.current?.click()}
+                isConfirmingClear={isConfirmingClear}
+                setIsConfirmingClear={setIsConfirmingClear}
+            />
 
             {generatedImage && <ImagePreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} imageUrl={generatedImage} onSendToEditor={onSendToEditor} />}
             <ConfirmationModal isOpen={!!styleToDelete} onClose={() => setStyleToDelete(null)} onConfirm={handleConfirmDelete} title="Confirmer la suppression">
